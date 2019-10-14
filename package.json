@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "prestart": "npm run build",
+    "postinstall": "npm run build",
     "build": "tsc",
     "lint": "eslint --fix --ext .ts src/"
   },
