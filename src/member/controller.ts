@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 
 import { getMembers, getMember, createMember, updateMember, deleteMember } from './service';
+import { toDTO } from './DTO';
 
 export async function handleGetMembers(req: Request, res: Response): Promise<void> {
   try {
     const members = await getMembers();
-    res.send(members);
+    const memberDTOs = members.map(member => toDTO(member));
+    res.send(memberDTOs);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -14,7 +16,8 @@ export async function handleGetMembers(req: Request, res: Response): Promise<voi
 export async function handleGetMember(req: Request, res: Response): Promise<void> {
   try {
     const member = await getMember(req.params.id);
-    res.send(member);
+    const memberDTO = toDTO(member);
+    res.send(memberDTO);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -23,7 +26,8 @@ export async function handleGetMember(req: Request, res: Response): Promise<void
 export async function handleCreateMember(req: Request, res: Response): Promise<void> {
   try {
     const createdMember = await createMember(req.body);
-    res.send(createdMember);
+    const createdMemberDTO = toDTO(createdMember);
+    res.send(createdMemberDTO);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -32,7 +36,8 @@ export async function handleCreateMember(req: Request, res: Response): Promise<v
 export async function handleUpdateMember(req: Request, res: Response): Promise<void> {
   try {
     const updatedMember = await updateMember(req.params.id, req.body);
-    res.send(updatedMember);
+    const updatedMemberDTO = toDTO(updatedMember);
+    res.send(updatedMemberDTO);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -41,7 +46,8 @@ export async function handleUpdateMember(req: Request, res: Response): Promise<v
 export async function handleDeleteMember(req: Request, res: Response): Promise<void> {
   try {
     const deletedMember = await deleteMember(req.params.id);
-    res.send(deletedMember);
+    const deletedMemberDTO = toDTO(deletedMember);
+    res.send(deletedMemberDTO);
   } catch (error) {
     res.status(500).send(error);
   }

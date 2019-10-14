@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 
 import { getVideos, getVideo, createVideo, updateVideo, deleteVideo } from './service';
+import { toDTO } from './DTO';
 
 export async function handleGetVideos(req: Request, res: Response): Promise<void> {
   try {
     const videos = await getVideos();
-    res.send(videos);
+    const videoDTOs = videos.map(video => toDTO(video));
+    res.send(videoDTOs);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -14,7 +16,8 @@ export async function handleGetVideos(req: Request, res: Response): Promise<void
 export async function handleGetVideo(req: Request, res: Response): Promise<void> {
   try {
     const video = await getVideo(req.params.id);
-    res.send(video);
+    const videoDTO = toDTO(video);
+    res.send(videoDTO);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -23,7 +26,8 @@ export async function handleGetVideo(req: Request, res: Response): Promise<void>
 export async function handleCreateVideo(req: Request, res: Response): Promise<void> {
   try {
     const createdVideo = await createVideo(req.body);
-    res.send(createdVideo);
+    const createdVideoDTO = toDTO(createdVideo);
+    res.send(createdVideoDTO);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -32,7 +36,8 @@ export async function handleCreateVideo(req: Request, res: Response): Promise<vo
 export async function handleUpdateVideo(req: Request, res: Response): Promise<void> {
   try {
     const updatedVideo = await updateVideo(req.params.id, req.body);
-    res.send(updatedVideo);
+    const updatedVideoDTO = toDTO(updatedVideo);
+    res.send(updatedVideoDTO);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -41,7 +46,8 @@ export async function handleUpdateVideo(req: Request, res: Response): Promise<vo
 export async function handleDeleteVideo(req: Request, res: Response): Promise<void> {
   try {
     const deletedVideo = await deleteVideo(req.params.id);
-    res.send(deletedVideo);
+    const deletedVideoDTO = toDTO(deletedVideo);
+    res.send(deletedVideoDTO);
   } catch (error) {
     res.status(500).send(error);
   }

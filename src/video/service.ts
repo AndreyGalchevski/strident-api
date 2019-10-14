@@ -1,4 +1,5 @@
 import VideoModel, { Video } from './model';
+import { VideoDTO } from './DTO';
 
 export async function getVideos(): Promise<Video[]> {
   const videos = await VideoModel.find();
@@ -11,12 +12,12 @@ export async function getVideo(id: string): Promise<Video> {
   return videos;
 }
 
-export async function createVideo(data: Video): Promise<Video> {
+export async function createVideo(data: VideoDTO): Promise<Video> {
   const createdVideo = await VideoModel.create(data);
   return createdVideo;
 }
 
-export async function updateVideo(id: string, data: Video): Promise<Video> {
+export async function updateVideo(id: string, data: VideoDTO): Promise<Video> {
   const filter = { _id: id };
   const options = { new: true, upsert: true };
   const updatedVideo = await VideoModel.findOneAndUpdate(filter, data, options);

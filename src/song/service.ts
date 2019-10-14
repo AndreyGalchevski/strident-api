@@ -1,4 +1,5 @@
 import SongModel, { Song } from './model';
+import { SongDTO } from './DTO';
 
 export async function getSongs(): Promise<Song[]> {
   const songs = await SongModel.find();
@@ -11,12 +12,12 @@ export async function getSong(id: string): Promise<Song> {
   return songs;
 }
 
-export async function createSong(data: Song): Promise<Song> {
+export async function createSong(data: SongDTO): Promise<Song> {
   const createdSong = await SongModel.create(data);
   return createdSong;
 }
 
-export async function updateSong(id: string, data: Song): Promise<Song> {
+export async function updateSong(id: string, data: SongDTO): Promise<Song> {
   const filter = { _id: id };
   const options = { new: true, upsert: true };
   const updatedSong = await SongModel.findOneAndUpdate(filter, data, options);

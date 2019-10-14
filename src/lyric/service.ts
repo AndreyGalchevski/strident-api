@@ -1,4 +1,5 @@
 import LyricModel, { Lyric } from './model';
+import { LyricDTO } from './DTO';
 
 export async function getLyrics(): Promise<Lyric[]> {
   const lyrics = await LyricModel.find();
@@ -11,12 +12,12 @@ export async function getLyric(id: string): Promise<Lyric> {
   return lyrics;
 }
 
-export async function createLyric(data: Lyric): Promise<Lyric> {
+export async function createLyric(data: LyricDTO): Promise<Lyric> {
   const createdLyric = await LyricModel.create(data);
   return createdLyric;
 }
 
-export async function updateLyric(id: string, data: Lyric): Promise<Lyric> {
+export async function updateLyric(id: string, data: LyricDTO): Promise<Lyric> {
   const filter = { _id: id };
   const options = { new: true, upsert: true };
   const updatedLyric = await LyricModel.findOneAndUpdate(filter, data, options);
