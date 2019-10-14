@@ -4,8 +4,7 @@ export interface GigDTO {
   id?: string;
   venue: string;
   address: string;
-  date: string;
-  hour: string;
+  date: Date;
   fbEvent: string;
   image: string;
 }
@@ -16,7 +15,6 @@ export function toDTO(doc: Gig): GigDTO {
     venue: doc.venue,
     address: doc.address,
     date: doc.date,
-    hour: doc.hour,
     fbEvent: doc.fbEvent,
     image: doc.image,
   };

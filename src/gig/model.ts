@@ -3,8 +3,7 @@ import { Document, Schema, model } from 'mongoose';
 export interface Gig extends Document {
   venue: string;
   address: string;
-  date: string;
-  hour: string;
+  date: Date;
   fbEvent: string;
   image: string;
 }
@@ -13,8 +12,7 @@ const GigSchema = new Schema(
   {
     venue: String,
     address: String,
-    date: String,
-    hour: String,
+    date: Date,
     fbEvent: String,
     image: String,
   },
