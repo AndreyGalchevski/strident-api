@@ -13,7 +13,7 @@ import songRouter from './song/router';
 import videoRouter from './video/router';
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 config();
 connectToDB();
@@ -34,7 +34,8 @@ app.use('/api/videos', videoRouter);
 
 app.listen(port, err => {
   if (err) {
-    return console.error(err);
+    console.error(err);
+    return;
   }
-  return console.log(`server is listening on ${port}`);
+  console.log(`server is listening on ${port}`);
 });
