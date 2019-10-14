@@ -32,4 +32,4 @@ app.use('/api/members', memberRouter);
 app.use('/api/songs', songRouter);
 app.use('/api/videos', videoRouter);
 
-app.listen(port);
+app.listen(port, () => console.log(`Server running on port ${port}`));
