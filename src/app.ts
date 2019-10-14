@@ -32,10 +32,4 @@ app.use('/api/members', memberRouter);
 app.use('/api/songs', songRouter);
 app.use('/api/videos', videoRouter);
 
-app.listen(port, err => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  console.log(`server is listening on ${port}`);
-});
+app.listen(port);
