@@ -6,11 +6,12 @@
   "scripts": {
     "start": "node dist/app.js",
     "prestart": "npm run build",
+    "postinstall": "npm run build",
     "build": "tsc",
     "lint": "eslint --fix --ext .ts src/"
   },
   "keywords": [],
-  "author": "",
+  "author": "Andrey Galchevski",
   "license": "ISC",
   "devDependencies": {
     "@types/cors": "^2.8.6",
