@@ -5,6 +5,7 @@ export interface Member extends Document {
   instrument: string;
   info: string;
   image: string;
+  imageNG: string;
 }
 
 const MemberSchema = new Schema(
@@ -13,6 +14,7 @@ const MemberSchema = new Schema(
     instrument: String,
     info: String,
     image: String,
+    imageNG: String,
   },
   { collection: 'members' },
 );
