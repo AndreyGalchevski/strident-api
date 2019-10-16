@@ -4,6 +4,7 @@ export interface GigDTO {
   id?: string;
   venue: string;
   address: string;
+  city: string;
   date: Date;
   fbEvent: string;
   image: string;
@@ -15,6 +16,7 @@ const GigSchema = new Schema(
   {
     venue: String,
     address: String,
+    city: String,
     date: Date,
     fbEvent: String,
     image: String,
@@ -29,6 +31,7 @@ export function toDTO(doc: GigDocument): GigDTO {
     id: String(doc._id),
     venue: doc.venue,
     address: doc.address,
+    city: doc.city,
     date: doc.date,
     fbEvent: doc.fbEvent,
     image: doc.image,
