@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { getSongs, getSong, createSong, updateSong, deleteSong } from './service';
-import { toDTO } from './DTO';
+import { toDTO } from './entity';
 
 export async function handleGetSongs(req: Request, res: Response): Promise<void> {
   try {

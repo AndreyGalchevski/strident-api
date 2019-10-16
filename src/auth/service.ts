@@ -1,5 +1,5 @@
-import UserModel from './model';
 import { createToken } from './utils';
+import { UserModel } from './entity';
 
 export async function login(username: string, password: string): Promise<string> {
   const filter = { username };

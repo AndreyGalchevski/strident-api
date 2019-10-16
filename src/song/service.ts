@@ -1,30 +1,29 @@
-import SongModel, { Song } from './model';
-import { SongDTO } from './DTO';
+import { SongDocument, SongModel, SongDTO } from './entity';
 
-export async function getSongs(): Promise<Song[]> {
+export async function getSongs(): Promise<SongDocument[]> {
   const songs = await SongModel.find();
   return songs;
 }
 
-export async function getSong(id: string): Promise<Song> {
+export async function getSong(id: string): Promise<SongDocument> {
   const filter = { _id: id };
   const songs = await SongModel.findOne(filter);
   return songs;
 }
 
-export async function createSong(data: SongDTO): Promise<Song> {
+export async function createSong(data: SongDTO): Promise<SongDocument> {
   const createdSong = await SongModel.create(data);
   return createdSong;
 }
 
-export async function updateSong(id: string, data: SongDTO): Promise<Song> {
+export async function updateSong(id: string, data: SongDTO): Promise<SongDocument> {
   const filter = { _id: id };
   const options = { new: true, upsert: true };
   const updatedSong = await SongModel.findOneAndUpdate(filter, data, options);
   return updatedSong;
 }
 
-export async function deleteSong(id: string): Promise<Song> {
+export async function deleteSong(id: string): Promise<SongDocument> {
   const filter = { _id: id };
   const deletedSong = await SongModel.findOneAndDelete(filter);
   return deletedSong;

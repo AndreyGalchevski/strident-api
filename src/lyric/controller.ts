@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { getLyrics, getLyric, createLyric, updateLyric, deleteLyric } from './service';
-import { toDTO } from './DTO';
+import { toDTO } from './entity';
 
 export async function handleGetLyrics(req: Request, res: Response): Promise<void> {
   try {

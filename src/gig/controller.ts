@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { getGigs, getGig, createGig, updateGig, deleteGig } from './service';
-import { toDTO } from './DTO';
+import { toDTO } from './entity';
 
 export async function handleGetGigs(req: Request, res: Response): Promise<void> {
   try {

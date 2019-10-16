@@ -1,8 +1,8 @@
 import { sign, verify } from 'jsonwebtoken';
 
-import { User } from './model';
+import { UserDocument } from './entity';
 
-export function createToken(user: User): string {
+export function createToken(user: UserDocument): string {
   const payload = {
     id: user._id,
     username: user.username,

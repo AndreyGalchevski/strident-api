@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { getVideos, getVideo, createVideo, updateVideo, deleteVideo } from './service';
-import { toDTO } from './DTO';
+import { toDTO } from './entity';
 
 export async function handleGetVideos(req: Request, res: Response): Promise<void> {
   try {

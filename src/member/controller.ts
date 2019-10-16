@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { getMembers, getMember, createMember, updateMember, deleteMember } from './service';
-import { toDTO } from './DTO';
+import { toDTO } from './entity';
 
 export async function handleGetMembers(req: Request, res: Response): Promise<void> {
   try {
