@@ -25,11 +25,11 @@ app.get('/', (req: Request, res: Response) => {
   res.send('So Far, So Good... So What?');
 });
 
-app.use('/api/auth', authRouter);
-app.use('/api/gigs', gigRouter);
-app.use('/api/lyrics', lyricRouter);
-app.use('/api/members', memberRouter);
-app.use('/api/songs', songRouter);
-app.use('/api/videos', videoRouter);
+app.use('/auth', authRouter);
+app.use('/gigs', gigRouter);
+app.use('/lyrics', lyricRouter);
+app.use('/members', memberRouter);
+app.use('/songs', songRouter);
+app.use('/videos', videoRouter);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
