@@ -18,7 +18,10 @@ const port = process.env.PORT || 8080;
 config();
 connectToDB();
 
-app.use(cors({ origin: process.env.ALLOWED_ORIGIN }));
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors({ origin: 'http://localhost:4000' }));
+}
+
 app.use(json());
 
 app.get('/', (req: Request, res: Response) => {
