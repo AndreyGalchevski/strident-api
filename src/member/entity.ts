@@ -7,6 +7,7 @@ export interface MemberDTO {
   info: string;
   image: string;
   imageNG: string;
+  order: number;
 }
 
 export type MemberDocument = MemberDTO & Document;
@@ -18,6 +19,7 @@ const MemberSchema = new Schema(
     info: String,
     image: String,
     imageNG: String,
+    order: Number,
   },
   { collection: 'members' },
 );
@@ -32,6 +34,7 @@ export function toDTO(doc: MemberDocument): MemberDTO {
     info: doc.info,
     image: doc.image,
     imageNG: doc.imageNG,
+    order: doc.order,
   };
 
   return member;

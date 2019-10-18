@@ -1,7 +1,8 @@
 import { MemberDocument, MemberModel, MemberDTO } from './entity';
 
 export async function getMembers(): Promise<MemberDocument[]> {
-  const members = await MemberModel.find();
+  const sortBy = { order: 1 };
+  const members = await MemberModel.find().sort(sortBy);
   return members;
 }
 

@@ -19,13 +19,13 @@ export async function handleUploadImage(req: ImageRequest, res: Response): Promi
     return;
   }
 
-  const publicID = `strident/${req.query.folderName}/${req.query.fileName}`;
+  const publicID = `strident/${req.query.folderName}/${process.env.NODE_ENV}/${req.query.fileName}`;
   const imagePath = files[0].path;
-  const webPImagePath = await convertToWebP(imagePath);
+  const ngImagePath = await convertToWebP(imagePath);
   try {
     const imageURL = await uploadImage(imagePath, publicID);
-    const NGImageURL = await uploadImage(webPImagePath, `${publicID}_ng`);
-    res.send({ imageURL, NGImageURL });
+    const ngImageURL = await uploadImage(ngImagePath, `${publicID}_ng`);
+    res.send({ imageURL, ngImageURL });
   } catch (error) {
     res.status(500).send(error);
   }

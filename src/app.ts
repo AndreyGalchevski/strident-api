@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { json } from 'body-parser';
+import { json, urlencoded } from 'body-parser';
 import { parse } from 'express-form-data';
 import { config } from 'dotenv';
 
@@ -22,7 +22,8 @@ connectToDB();
 
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN }));
 
-app.use(json());
+app.use(json({ limit: '1mb' }));
+app.use(urlencoded({ extended: true, limit: '1mb' }));
 app.use(parse());
 
 app.get('/', (req: Request, res: Response) => {
