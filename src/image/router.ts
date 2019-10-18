@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
-import { handleGetLyrics, handleGetLyric } from './controller';
+import { handleUploadImage, handleDestroyImage } from './controller';
 import authMiddleware from '../auth/middleware';
 
-const lyricRouter = Router();
+const imageRouter = Router();
 
-lyricRouter.post('/', authMiddleware, handleGetLyrics);
-lyricRouter.delete('/', authMiddleware, handleGetLyric);
+imageRouter.post('/', authMiddleware, handleUploadImage);
+imageRouter.delete('/', authMiddleware, handleDestroyImage);
 
-export default lyricRouter;
+export default imageRouter;
