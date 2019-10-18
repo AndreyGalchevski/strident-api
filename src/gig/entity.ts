@@ -8,6 +8,7 @@ export interface GigDTO {
   date: Date;
   fbEvent: string;
   image: string;
+  imageNG: string;
 }
 
 export type GigDocument = GigDTO & Document;
@@ -20,6 +21,7 @@ const GigSchema = new Schema(
     date: Date,
     fbEvent: String,
     image: String,
+    imageNG: String,
   },
   { collection: 'gigs' },
 );
@@ -35,6 +37,7 @@ export function toDTO(doc: GigDocument): GigDTO {
     date: doc.date,
     fbEvent: doc.fbEvent,
     image: doc.image,
+    imageNG: doc.imageNG,
   };
 
   return gig;
