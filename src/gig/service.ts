@@ -1,7 +1,8 @@
 import { GigDocument, GigModel, GigDTO } from './entity';
 
 export async function getGigs(): Promise<GigDocument[]> {
-  const gigs = await GigModel.find();
+  const sortBy = { date: -1 };
+  const gigs = await GigModel.find().sort(sortBy);
   return gigs;
 }
 
