@@ -7,8 +7,8 @@ export async function getVideos(): Promise<VideoDocument[]> {
 
 export async function getVideo(id: string): Promise<VideoDocument> {
   const filter = { _id: id };
-  const videos = await VideoModel.findOne(filter);
-  return videos;
+  const video = await VideoModel.findOne(filter);
+  return video;
 }
 
 export async function createVideo(data: VideoDTO): Promise<VideoDocument> {

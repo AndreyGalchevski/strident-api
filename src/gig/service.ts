@@ -8,8 +8,8 @@ export async function getGigs(): Promise<GigDocument[]> {
 
 export async function getGig(id: string): Promise<GigDocument> {
   const filter = { _id: id };
-  const gigs = await GigModel.findOne(filter);
-  return gigs;
+  const gig = await GigModel.findOne(filter);
+  return gig;
 }
 
 export async function createGig(data: GigDTO): Promise<GigDocument> {

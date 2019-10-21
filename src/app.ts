@@ -8,11 +8,12 @@ import connectToDB from './utils/db';
 
 import authRouter from './auth/router';
 import gigRouter from './gig/router';
+import imageRouter from './image/router';
 import lyricRouter from './lyric/router';
 import memberRouter from './member/router';
+import merchandiseRouter from './merchandise/router';
 import songRouter from './song/router';
 import videoRouter from './video/router';
-import imageRouter from './image/router';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -32,10 +33,11 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/auth', authRouter);
 app.use('/gigs', gigRouter);
+app.use('/images', imageRouter);
 app.use('/lyrics', lyricRouter);
 app.use('/members', memberRouter);
+app.use('/merchandises', merchandiseRouter);
 app.use('/songs', songRouter);
 app.use('/videos', videoRouter);
-app.use('/images', imageRouter);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

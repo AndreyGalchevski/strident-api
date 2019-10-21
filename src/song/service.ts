@@ -7,8 +7,8 @@ export async function getSongs(): Promise<SongDocument[]> {
 
 export async function getSong(id: string): Promise<SongDocument> {
   const filter = { _id: id };
-  const songs = await SongModel.findOne(filter);
-  return songs;
+  const song = await SongModel.findOne(filter);
+  return song;
 }
 
 export async function createSong(data: SongDTO): Promise<SongDocument> {

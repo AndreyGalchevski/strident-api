@@ -8,8 +8,8 @@ export async function getMembers(): Promise<MemberDocument[]> {
 
 export async function getMember(id: string): Promise<MemberDocument> {
   const filter = { _id: id };
-  const members = await MemberModel.findOne(filter);
-  return members;
+  const member = await MemberModel.findOne(filter);
+  return member;
 }
 
 export async function createMember(data: MemberDTO): Promise<MemberDocument> {
