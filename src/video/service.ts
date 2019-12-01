@@ -1,7 +1,7 @@
 import { VideoDocument, VideoModel, VideoDTO } from './entity';
 
 export async function getVideos(): Promise<VideoDocument[]> {
-  const videos = await VideoModel.find();
+  const videos = await VideoModel.find().sort({ date: -1 });
   return videos;
 }
 
