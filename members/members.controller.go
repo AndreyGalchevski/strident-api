@@ -40,11 +40,11 @@ var members = []Member{
 	},
 }
 
-func HandleGetMembers(c *gin.Context) {
+func handleGetMembers(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": members})
 }
 
-func HandlePostMember(c *gin.Context) {
+func handlePostMember(c *gin.Context) {
 	var newMember Member
 
 	if err := c.BindJSON(&newMember); err != nil {
@@ -56,7 +56,7 @@ func HandlePostMember(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMember.ID})
 }
 
-func HandleGetMemberByID(c *gin.Context) {
+func handleGetMemberByID(c *gin.Context) {
 	id := c.Param("id")
 
 	for _, member := range members {

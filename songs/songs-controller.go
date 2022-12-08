@@ -52,11 +52,11 @@ var songs = []Song{
 	},
 }
 
-func HandleGetSongs(c *gin.Context) {
+func handleGetSongs(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": songs})
 }
 
-func HandlePostSong(c *gin.Context) {
+func handlePostSong(c *gin.Context) {
 	var newSong Song
 
 	if err := c.BindJSON(&newSong); err != nil {
@@ -68,7 +68,7 @@ func HandlePostSong(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newSong.ID})
 }
 
-func HandleGetSongByID(c *gin.Context) {
+func handleGetSongByID(c *gin.Context) {
 	id := c.Param("id")
 
 	for _, song := range songs {

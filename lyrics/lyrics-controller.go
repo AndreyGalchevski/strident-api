@@ -76,11 +76,11 @@ var lyrics = []Lyric{
 	},
 }
 
-func HandleGetLyrics(c *gin.Context) {
+func handleGetLyrics(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": lyrics})
 }
 
-func HandlePostLyric(c *gin.Context) {
+func handlePostLyric(c *gin.Context) {
 	var newLyric Lyric
 
 	if err := c.BindJSON(&newLyric); err != nil {
@@ -92,7 +92,7 @@ func HandlePostLyric(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newLyric.ID})
 }
 
-func HandleGetLyricByID(c *gin.Context) {
+func handleGetLyricByID(c *gin.Context) {
 	id := c.Param("id")
 
 	for _, lyric := range lyrics {

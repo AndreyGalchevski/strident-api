@@ -60,11 +60,11 @@ var videos = []Video{
 	},
 }
 
-func HandleGetVideos(c *gin.Context) {
+func handleGetVideos(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": videos})
 }
 
-func HandlePostVideo(c *gin.Context) {
+func handlePostVideo(c *gin.Context) {
 	var newVideo Video
 
 	if err := c.BindJSON(&newVideo); err != nil {
@@ -76,7 +76,7 @@ func HandlePostVideo(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newVideo.ID})
 }
 
-func HandleGetVideoByID(c *gin.Context) {
+func handleGetVideoByID(c *gin.Context) {
 	id := c.Param("id")
 
 	for _, video := range videos {

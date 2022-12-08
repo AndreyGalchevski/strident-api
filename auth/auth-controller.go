@@ -18,7 +18,7 @@ type User struct {
 
 var user User = User{username: "michael123", password: "123"}
 
-func HandlePostLogin(c *gin.Context) {
+func handlePostLogin(c *gin.Context) {
 	var credentials Credentials
 
 	if err := c.BindJSON(&credentials); err != nil {
@@ -43,7 +43,7 @@ func HandlePostLogin(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": token})
 }
 
-func HandlePostVerify(c *gin.Context) {
+func handlePostVerify(c *gin.Context) {
 	username, err := VerifyToken(c.Param("token"))
 
 	if err != nil {

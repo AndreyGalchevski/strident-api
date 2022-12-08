@@ -90,11 +90,11 @@ var merchandise = []Merchandise{
 	},
 }
 
-func HandleGetMerchandise(c *gin.Context) {
+func handleGetMerchandise(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": merchandise})
 }
 
-func HandlePostMerchandise(c *gin.Context) {
+func handlePostMerchandise(c *gin.Context) {
 	var newMerchandise Merchandise
 
 	if err := c.BindJSON(&newMerchandise); err != nil {
@@ -106,7 +106,7 @@ func HandlePostMerchandise(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMerchandise.ID})
 }
 
-func HandleGetMerchandiseByID(c *gin.Context) {
+func handleGetMerchandiseByID(c *gin.Context) {
 	id := c.Param("id")
 
 	for _, merchandiseItem := range merchandise {

@@ -190,11 +190,11 @@ var gigs = []Gig{
 	},
 }
 
-func HandleGetGigs(c *gin.Context) {
+func handleGetGigs(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": gigs})
 }
 
-func HandlePostGig(c *gin.Context) {
+func handlePostGig(c *gin.Context) {
 	var newGig Gig
 
 	if err := c.BindJSON(&newGig); err != nil {
@@ -206,7 +206,7 @@ func HandlePostGig(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newGig.ID})
 }
 
-func HandleGetGigByID(c *gin.Context) {
+func handleGetGigByID(c *gin.Context) {
 	id := c.Param("id")
 
 	for _, gig := range gigs {
