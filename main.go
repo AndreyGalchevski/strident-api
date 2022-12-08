@@ -27,6 +27,8 @@ func main() {
 
 	router.Use(cors.New(config))
 
+	router.POST("/auth/login", auth.HandlePostLogin)
+
 	router.GET("/gigs", gigs.HandleGetGigs)
 	router.GET("/gigs/:id", gigs.HandleGetGigByID)
 	router.POST("/gigs", gigs.HandlePostGig)
