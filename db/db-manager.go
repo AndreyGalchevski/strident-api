@@ -24,12 +24,6 @@ func Connect() *mongo.Client {
 		panic(err)
 	}
 
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
-
 	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		panic(err)
 	}
@@ -39,7 +33,7 @@ func Connect() *mongo.Client {
 	return client
 }
 
-var DB *mongo.Client = Connect()
+var DBClient *mongo.Client = Connect()
 
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	collection := client.Database("main").Collection(collectionName)
