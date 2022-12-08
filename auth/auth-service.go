@@ -8,6 +8,7 @@ import (
 	"github.com/AndreyGalchevski/strident-api/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const WRONG_CREDENTIALS_ERROR = "wrong credentials"
@@ -30,7 +31,9 @@ func login(credentials Credentials) (string, error) {
 		return "", err
 	}
 
-	if credentials.Password != user.Password {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password))
+
+	if err != nil {
 		return "", errors.New(WRONG_CREDENTIALS_ERROR)
 	}
 
