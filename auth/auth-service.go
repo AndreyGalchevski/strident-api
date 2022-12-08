@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const WRONG_CREDENTIALS_ERROR = "wrong credentials"
+const WRONG_CREDENTIALS_ERROR = "that's not the right password"
 
 var usersCollection *mongo.Collection = db.GetCollection(db.DBClient, "users")
 
