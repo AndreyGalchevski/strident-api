@@ -21,7 +21,7 @@ func login(credentials Credentials) (string, error) {
 
 	var user User
 
-	err := usersCollection.FindOne(ctx, bson.M{"username": credentials.Username}).Decode(&user)
+	err := usersCollection.FindOne(ctx, bson.M{"email": credentials.Email}).Decode(&user)
 
 	if err != nil {
 		if err.Error() == "mongo: no documents in result" {
@@ -37,7 +37,7 @@ func login(credentials Credentials) (string, error) {
 		return "", errors.New(WRONG_CREDENTIALS_ERROR)
 	}
 
-	token, err := GenerateToken(credentials.Username)
+	token, err := GenerateToken(user.ID.Hex())
 
 	if err != nil {
 		return "", err

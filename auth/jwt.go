@@ -11,13 +11,13 @@ import (
 var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 
 type Claims struct {
-	Username string `json:"username"`
+	UserID string `json:"userID"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(username string) (string, error) {
+func GenerateToken(userID string) (string, error) {
 	claims := &Claims{
-		Username: username,
+		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Minute)),
 		},
@@ -52,5 +52,5 @@ func VerifyToken(candidate string) (string, error) {
 		return "", errors.New("bad token")
 	}
 
-	return claims.Username, nil
+	return claims.UserID, nil
 }
