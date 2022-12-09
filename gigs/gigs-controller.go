@@ -17,6 +17,17 @@ func handleGetGigs(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": gigs})
 }
 
+func handleGetGigByID(c *gin.Context) {
+	gig, err := getGigByID(c.Param("id"))
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"data": gig})
+}
+
 // func handlePostGig(c *gin.Context) {
 // 	var newGig Gig
 
@@ -27,17 +38,4 @@ func handleGetGigs(c *gin.Context) {
 // 	gigs = append(gigs, newGig)
 
 // 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newGig.ID})
-// }
-
-// func handleGetGigByID(c *gin.Context) {
-// 	id := c.Param("id")
-
-// 	for _, gig := range gigs {
-// 		if gig.ID == id {
-// 			c.IndentedJSON(http.StatusOK, gin.H{"data": gig})
-// 			return
-// 		}
-// 	}
-
-// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": "gig not found"})
 // }

@@ -17,6 +17,17 @@ func handleGetVideos(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": videos})
 }
 
+func handleGetVideoByID(c *gin.Context) {
+	video, err := getVideoByID(c.Param("id"))
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"data": video})
+}
+
 // func handlePostVideo(c *gin.Context) {
 // 	var newVideo Video
 
@@ -27,17 +38,4 @@ func handleGetVideos(c *gin.Context) {
 // 	videos = append(videos, newVideo)
 
 // 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newVideo.ID})
-// }
-
-// func handleGetVideoByID(c *gin.Context) {
-// 	id := c.Param("id")
-
-// 	for _, video := range videos {
-// 		if video.ID == id {
-// 			c.IndentedJSON(http.StatusOK, gin.H{"data": video})
-// 			return
-// 		}
-// 	}
-
-// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": "video not found"})
 // }

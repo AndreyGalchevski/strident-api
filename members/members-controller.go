@@ -17,6 +17,17 @@ func handleGetMembers(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": members})
 }
 
+func handleGetMemberByID(c *gin.Context) {
+	member, err := getMemberByID(c.Param("id"))
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"data": member})
+}
+
 // func handlePostMember(c *gin.Context) {
 // 	var newMember Member
 
@@ -27,17 +38,4 @@ func handleGetMembers(c *gin.Context) {
 // 	members = append(members, newMember)
 
 // 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMember.ID})
-// }
-
-// func handleGetMemberByID(c *gin.Context) {
-// 	id := c.Param("id")
-
-// 	for _, member := range members {
-// 		if member.ID == id {
-// 			c.IndentedJSON(http.StatusOK, gin.H{"data": member})
-// 			return
-// 		}
-// 	}
-
-// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": "member not found"})
 // }

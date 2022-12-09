@@ -6,6 +6,7 @@ import (
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -38,4 +39,21 @@ func getVideos() ([]Video, error) {
 	}
 
 	return videos, nil
+}
+
+func getVideoByID(id string) (Video, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var video Video
+
+	objID, _ := primitive.ObjectIDFromHex(id)
+
+	err := videosCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&video)
+
+	if err != nil {
+		return video, err
+	}
+
+	return video, nil
 }

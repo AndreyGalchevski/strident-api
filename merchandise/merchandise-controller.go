@@ -29,15 +29,13 @@ func handleGetMerchandise(c *gin.Context) {
 // 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMerchandise.ID})
 // }
 
-// func handleGetMerchandiseByID(c *gin.Context) {
-// 	id := c.Param("id")
+func handleGetMerchandiseByID(c *gin.Context) {
+	merchandise, err := getMerchandiseByID(c.Param("id"))
 
-// 	for _, merchandiseItem := range merchandise {
-// 		if merchandiseItem.ID == id {
-// 			c.IndentedJSON(http.StatusOK, gin.H{"data": merchandiseItem})
-// 			return
-// 		}
-// 	}
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": "merchandise not found"})
-// }
+	c.IndentedJSON(http.StatusOK, gin.H{"data": merchandise})
+}

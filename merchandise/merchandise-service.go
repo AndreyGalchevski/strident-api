@@ -6,6 +6,7 @@ import (
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -35,6 +36,23 @@ func getMerchandise() ([]Merchandise, error) {
 		}
 
 		merchandise = append(merchandise, singleMerchandise)
+	}
+
+	return merchandise, nil
+}
+
+func getMerchandiseByID(id string) (Merchandise, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var merchandise Merchandise
+
+	objID, _ := primitive.ObjectIDFromHex(id)
+
+	err := merchandiseCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
+
+	if err != nil {
+		return merchandise, err
 	}
 
 	return merchandise, nil

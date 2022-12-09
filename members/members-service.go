@@ -6,6 +6,7 @@ import (
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -38,4 +39,21 @@ func getMembers() ([]Member, error) {
 	}
 
 	return members, nil
+}
+
+func getMemberByID(id string) (Member, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var member Member
+
+	objID, _ := primitive.ObjectIDFromHex(id)
+
+	err := membersCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&member)
+
+	if err != nil {
+		return member, err
+	}
+
+	return member, nil
 }

@@ -17,6 +17,17 @@ func handleGetLyrics(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": lyrics})
 }
 
+func handleGetLyricByID(c *gin.Context) {
+	lyric, err := getLyricByID(c.Param("id"))
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"data": lyric})
+}
+
 // func handlePostLyric(c *gin.Context) {
 // 	var newLyric Lyric
 
@@ -27,17 +38,4 @@ func handleGetLyrics(c *gin.Context) {
 // 	lyrics = append(lyrics, newLyric)
 
 // 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newLyric.ID})
-// }
-
-// func handleGetLyricByID(c *gin.Context) {
-// 	id := c.Param("id")
-
-// 	for _, lyric := range lyrics {
-// 		if lyric.ID == id {
-// 			c.IndentedJSON(http.StatusOK, gin.H{"data": lyric})
-// 			return
-// 		}
-// 	}
-
-// 	c.IndentedJSON(http.StatusNotFound, gin.H{"error": "lyric not found"})
 // }

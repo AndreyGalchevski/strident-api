@@ -6,6 +6,7 @@ import (
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -38,4 +39,21 @@ func getSongs() ([]Song, error) {
 	}
 
 	return songs, nil
+}
+
+func getSongByID(id string) (Song, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var song Song
+
+	objID, _ := primitive.ObjectIDFromHex(id)
+
+	err := songsCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&song)
+
+	if err != nil {
+		return song, err
+	}
+
+	return song, nil
 }
