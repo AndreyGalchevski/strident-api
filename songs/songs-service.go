@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var songsCollection *mongo.Collection = db.GetCollection(db.DBClient, "merchandise")
+var songsCollection *mongo.Collection = db.GetCollection(db.DBClient, "songs")
 
 func getSongs() ([]Song, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
