@@ -11,6 +11,7 @@ func handleGetMembers(c *gin.Context) {
 
 	if err != nil {
 		c.IndentedJSON(http.StatusOK, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"data": members})
