@@ -7,4 +7,5 @@ func InitGigsRouter(router *gin.Engine) {
 	router.GET("/gigs/:id", handleGetGigByID)
 	router.POST("/gigs", handlePostGig)
 	router.PATCH("/gigs/:id", handlePatchGig)
+	router.DELETE("/gigs/:id", handleDeleteGig)
 }

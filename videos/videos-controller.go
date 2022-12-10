@@ -89,3 +89,19 @@ func handlePatchVideo(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
 }
+
+func handleDeleteVideo(c *gin.Context) {
+	ok, err := deleteVideo(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+}

@@ -97,3 +97,20 @@ func updateMerchandise(merchandiseID string, merchandiseData Merchandise) (bool,
 
 	return ok, nil
 }
+
+func deleteMerchandise(merchandiseD string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(merchandiseD)
+
+	result, err := merchandiseCollection.DeleteOne(ctx, bson.M{"_id": objID})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.DeletedCount == 1
+
+	return ok, nil
+}

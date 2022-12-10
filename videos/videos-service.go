@@ -94,3 +94,20 @@ func updateVideo(videoID string, videoData Video) (bool, error) {
 
 	return ok, nil
 }
+
+func deleteVideo(videoID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(videoID)
+
+	result, err := videosCollection.DeleteOne(ctx, bson.M{"_id": objID})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.DeletedCount == 1
+
+	return ok, nil
+}

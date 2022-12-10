@@ -7,4 +7,5 @@ func InitMembersRouter(router *gin.Engine) {
 	router.GET("/members/:id", handleGetMemberByID)
 	router.POST("/members", handlePostMember)
 	router.PATCH("/members/:id", handlePatchMember)
+	router.DELETE("/members/:id", handleDeleteMember)
 }

@@ -7,4 +7,5 @@ func InitVideosRouter(router *gin.Engine) {
 	router.GET("/videos/:id", handleGetVideoByID)
 	router.POST("/videos", handlePostVideo)
 	router.PATCH("/videos/:id", handlePatchVideo)
+	router.DELETE("/videos/:id", handleDeleteVideo)
 }

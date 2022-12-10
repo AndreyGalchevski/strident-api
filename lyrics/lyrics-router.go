@@ -7,4 +7,5 @@ func InitLyricsRouter(router *gin.Engine) {
 	router.GET("/lyrics/:id", handleGetLyricByID)
 	router.POST("/lyrics", handlePostLyric)
 	router.PATCH("/lyrics/:id", handlePatchLyric)
+	router.DELETE("/lyrics/:id", handleDeleteLyric)
 }

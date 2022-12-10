@@ -95,3 +95,20 @@ func updateMember(memberID string, memberData Member) (bool, error) {
 
 	return ok, nil
 }
+
+func deleteMember(memberD string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(memberD)
+
+	result, err := membersCollection.DeleteOne(ctx, bson.M{"_id": objID})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.DeletedCount == 1
+
+	return ok, nil
+}

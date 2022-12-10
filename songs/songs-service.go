@@ -95,3 +95,20 @@ func updateSong(songID string, songData Song) (bool, error) {
 
 	return ok, nil
 }
+
+func deleteSong(songID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(songID)
+
+	result, err := songsCollection.DeleteOne(ctx, bson.M{"_id": objID})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.DeletedCount == 1
+
+	return ok, nil
+}
