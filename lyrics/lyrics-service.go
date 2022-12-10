@@ -72,3 +72,26 @@ func createLyric(lyricData Lyric) (string, error) {
 
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
+
+func updateLyric(lyricID string, lyricData Lyric) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(lyricID)
+
+	update := bson.M{
+		"name":  lyricData.Name,
+		"text":  lyricData.Text,
+		"album": lyricData.Album,
+	}
+
+	result, err := lyricsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.MatchedCount == 1
+
+	return ok, nil
+}

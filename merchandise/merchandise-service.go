@@ -72,3 +72,28 @@ func createMerchandise(merchandiseData Merchandise) (string, error) {
 
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
+
+func updateMerchandise(merchandiseID string, merchandiseData Merchandise) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(merchandiseID)
+
+	update := bson.M{
+		"name":  merchandiseData.Name,
+		"type":  merchandiseData.Type,
+		"price": merchandiseData.Price,
+		"url":   merchandiseData.URL,
+		"image": merchandiseData.Image,
+	}
+
+	result, err := merchandiseCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.MatchedCount == 1
+
+	return ok, nil
+}

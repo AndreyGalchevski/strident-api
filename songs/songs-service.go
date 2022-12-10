@@ -72,3 +72,26 @@ func createSong(songData Song) (string, error) {
 
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
+
+func updateSong(songID string, songData Song) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(songID)
+
+	update := bson.M{
+		"name":  songData.Name,
+		"url":   songData.URL,
+		"album": songData.Album,
+	}
+
+	result, err := songsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.MatchedCount == 1
+
+	return ok, nil
+}

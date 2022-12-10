@@ -6,4 +6,5 @@ func InitMerchandiseRouter(router *gin.Engine) {
 	router.GET("/merchandise", handleGetMerchandise)
 	router.GET("/merchandise/:id", handleGetMerchandiseByID)
 	router.POST("/merchandise", handlePostMerchandise)
+	router.POST("/merchandise/:id", handlePatchMerchandise)
 }

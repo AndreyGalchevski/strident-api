@@ -72,3 +72,30 @@ func createGig(gigData Gig) (string, error) {
 
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
+
+func updateGig(gigID string, gigData Gig) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(gigID)
+
+	update := bson.M{
+		"name":    gigData.Name,
+		"venue":   gigData.Venue,
+		"address": gigData.Address,
+		"city":    gigData.City,
+		"date":    gigData.Date,
+		"fbEvent": gigData.FBEvent,
+		"image":   gigData.Image,
+	}
+
+	result, err := gigsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.MatchedCount == 1
+
+	return ok, nil
+}

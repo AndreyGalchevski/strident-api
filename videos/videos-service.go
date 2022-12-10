@@ -72,3 +72,25 @@ func createVideo(videoData Video) (string, error) {
 
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
+
+func updateVideo(videoID string, videoData Video) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(videoID)
+
+	update := bson.M{
+		"name": videoData.Name,
+		"url":  videoData.URL,
+	}
+
+	result, err := videosCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.MatchedCount == 1
+
+	return ok, nil
+}

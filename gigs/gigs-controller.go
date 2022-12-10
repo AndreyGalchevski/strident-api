@@ -57,3 +57,35 @@ func handlePostGig(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"data": newGigID})
 }
+
+func handlePatchGig(c *gin.Context) {
+	var gigData Gig
+
+	err := c.BindJSON(&gigData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = validate.Struct(&gigData)
+
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	ok, err := updateGig(c.Param("id"), gigData)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+}

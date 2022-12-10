@@ -72,3 +72,26 @@ func createMember(memberData Member) (string, error) {
 
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
+
+func updateMember(memberID string, memberData Member) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, _ := primitive.ObjectIDFromHex(memberID)
+
+	update := bson.M{
+		"name":       memberData.Name,
+		"instrument": memberData.Instrument,
+		"image":      memberData.Image,
+	}
+
+	result, err := membersCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+
+	if err != nil {
+		return false, err
+	}
+
+	ok := result.MatchedCount == 1
+
+	return ok, nil
+}

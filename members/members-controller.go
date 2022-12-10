@@ -57,3 +57,35 @@ func handlePostMember(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"data": newMemberID})
 }
+
+func handlePatchMember(c *gin.Context) {
+	var memberData Member
+
+	err := c.BindJSON(&memberData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = validate.Struct(&memberData)
+
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	ok, err := updateMember(c.Param("id"), memberData)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+}

@@ -57,3 +57,35 @@ func handlePostLyric(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"data": newLyricID})
 }
+
+func handlePatchLyric(c *gin.Context) {
+	var lyricData Lyric
+
+	err := c.BindJSON(&lyricData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = validate.Struct(&lyricData)
+
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	ok, err := updateLyric(c.Param("id"), lyricData)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+}

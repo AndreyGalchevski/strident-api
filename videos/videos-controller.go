@@ -57,3 +57,35 @@ func handlePostVideo(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"data": newVideoID})
 }
+
+func handlePatchVideo(c *gin.Context) {
+	var videoData Video
+
+	err := c.BindJSON(&videoData)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = validate.Struct(&videoData)
+
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	ok, err := updateVideo(c.Param("id"), videoData)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+}
