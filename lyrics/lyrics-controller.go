@@ -13,22 +13,22 @@ func handleGetLyrics(c *gin.Context) {
 	lyrics, err := getLyrics()
 
 	if err != nil {
-		c.IndentedJSON(http.StatusOK, gin.H{"error": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"data": lyrics})
+	c.JSON(http.StatusOK, gin.H{"data": lyrics})
 }
 
 func handleGetLyricByID(c *gin.Context) {
 	lyric, err := getLyricByID(c.Param("id"))
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"data": lyric})
+	c.JSON(http.StatusOK, gin.H{"data": lyric})
 }
 
 func handlePostLyric(c *gin.Context) {
@@ -37,23 +37,23 @@ func handlePostLyric(c *gin.Context) {
 	err := c.BindJSON(&lyricData)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	err = validate.Struct(&lyricData)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
 	newLyricID, err := createLyric(lyricData)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 
 	}
 
-	c.IndentedJSON(http.StatusCreated, gin.H{"data": newLyricID})
+	c.JSON(http.StatusCreated, gin.H{"data": newLyricID})
 }

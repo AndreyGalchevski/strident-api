@@ -13,22 +13,22 @@ func handleGetVideos(c *gin.Context) {
 	videos, err := getVideos()
 
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"data": videos})
+	c.JSON(http.StatusOK, gin.H{"data": videos})
 }
 
 func handleGetVideoByID(c *gin.Context) {
 	video, err := getVideoByID(c.Param("id"))
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"data": video})
+	c.JSON(http.StatusOK, gin.H{"data": video})
 }
 
 func handlePostVideo(c *gin.Context) {
@@ -37,23 +37,23 @@ func handlePostVideo(c *gin.Context) {
 	err := c.BindJSON(&videoData)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	err = validate.Struct(&videoData)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
 	newVideoID, err := createVideo(videoData)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 
 	}
 
-	c.IndentedJSON(http.StatusCreated, gin.H{"data": newVideoID})
+	c.JSON(http.StatusCreated, gin.H{"data": newVideoID})
 }
