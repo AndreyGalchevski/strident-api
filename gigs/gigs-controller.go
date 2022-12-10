@@ -4,7 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
+
+var validate = validator.New()
 
 func handleGetGigs(c *gin.Context) {
 	gigs, err := getGigs()
@@ -28,14 +31,29 @@ func handleGetGigByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": gig})
 }
 
-// func handlePostGig(c *gin.Context) {
-// 	var newGig Gig
+func handlePostGig(c *gin.Context) {
+	var gigData Gig
 
-// 	if err := c.BindJSON(&newGig); err != nil {
-// 		return
-// 	}
+	err := c.BindJSON(&gigData)
 
-// 	gigs = append(gigs, newGig)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newGig.ID})
-// }
+	err = validate.Struct(&gigData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	newGigID, err := createGig(gigData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	}
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"data": newGigID})
+}

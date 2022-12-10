@@ -4,7 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
+
+var validate = validator.New()
 
 func handleGetMerchandise(c *gin.Context) {
 	merchandise, err := getMerchandise()
@@ -17,18 +20,6 @@ func handleGetMerchandise(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": merchandise})
 }
 
-// func handlePostMerchandise(c *gin.Context) {
-// 	var newMerchandise Merchandise
-
-// 	if err := c.BindJSON(&newMerchandise); err != nil {
-// 		return
-// 	}
-
-// 	merchandise = append(merchandise, newMerchandise)
-
-// 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMerchandise.ID})
-// }
-
 func handleGetMerchandiseByID(c *gin.Context) {
 	merchandise, err := getMerchandiseByID(c.Param("id"))
 
@@ -38,4 +29,31 @@ func handleGetMerchandiseByID(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"data": merchandise})
+}
+
+func handlePostMerchandise(c *gin.Context) {
+	var merchandiseData Merchandise
+
+	err := c.BindJSON(&merchandiseData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = validate.Struct(&merchandiseData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	newMerchandiseID, err := createMerchandise(merchandiseData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	}
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMerchandiseID})
 }

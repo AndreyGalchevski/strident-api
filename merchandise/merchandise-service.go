@@ -57,3 +57,18 @@ func getMerchandiseByID(id string) (Merchandise, error) {
 
 	return merchandise, nil
 }
+
+func createMerchandise(merchandiseData Merchandise) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	merchandiseData.ID = primitive.NewObjectID()
+
+	result, err := merchandiseCollection.InsertOne(ctx, merchandiseData)
+
+	if err != nil {
+		return "", err
+	}
+
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+}

@@ -57,3 +57,18 @@ func getMemberByID(id string) (Member, error) {
 
 	return member, nil
 }
+
+func createMember(memberData Member) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	memberData.ID = primitive.NewObjectID()
+
+	result, err := membersCollection.InsertOne(ctx, memberData)
+
+	if err != nil {
+		return "", err
+	}
+
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+}

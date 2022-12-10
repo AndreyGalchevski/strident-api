@@ -9,6 +9,6 @@ type Gig struct {
 	Address string             `json:"address,omitempty" validate:"required"`
 	City    string             `json:"city,omitempty" validate:"required"`
 	Date    string             `json:"date,omitempty" validate:"required"`
-	FBEvent string             `json:"fbEvent,omitempty" validate:"required"`
-	Image   string             `json:"image,omitempty" validate:"required"`
+	FBEvent string             `json:"fbEvent,omitempty" validate:"required,url"`
+	Image   string             `json:"image,omitempty" validate:"required,url"`
 }

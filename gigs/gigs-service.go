@@ -57,3 +57,18 @@ func getGigByID(id string) (Gig, error) {
 
 	return gig, nil
 }
+
+func createGig(gigData Gig) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	gigData.ID = primitive.NewObjectID()
+
+	result, err := gigsCollection.InsertOne(ctx, gigData)
+
+	if err != nil {
+		return "", err
+	}
+
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+}

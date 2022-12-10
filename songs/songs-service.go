@@ -57,3 +57,18 @@ func getSongByID(id string) (Song, error) {
 
 	return song, nil
 }
+
+func createSong(songData Song) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	songData.ID = primitive.NewObjectID()
+
+	result, err := songsCollection.InsertOne(ctx, songData)
+
+	if err != nil {
+		return "", err
+	}
+
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+}

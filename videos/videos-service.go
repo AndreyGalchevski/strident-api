@@ -57,3 +57,18 @@ func getVideoByID(id string) (Video, error) {
 
 	return video, nil
 }
+
+func createVideo(videoData Video) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	videoData.ID = primitive.NewObjectID()
+
+	result, err := videosCollection.InsertOne(ctx, videoData)
+
+	if err != nil {
+		return "", err
+	}
+
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+}

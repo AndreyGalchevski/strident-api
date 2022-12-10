@@ -4,7 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
+
+var validate = validator.New()
 
 func handleGetLyrics(c *gin.Context) {
 	lyrics, err := getLyrics()
@@ -28,14 +31,29 @@ func handleGetLyricByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": lyric})
 }
 
-// func handlePostLyric(c *gin.Context) {
-// 	var newLyric Lyric
+func handlePostLyric(c *gin.Context) {
+	var lyricData Lyric
 
-// 	if err := c.BindJSON(&newLyric); err != nil {
-// 		return
-// 	}
+	err := c.BindJSON(&lyricData)
 
-// 	lyrics = append(lyrics, newLyric)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newLyric.ID})
-// }
+	err = validate.Struct(&lyricData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	newLyricID, err := createLyric(lyricData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	}
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"data": newLyricID})
+}

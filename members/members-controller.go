@@ -4,7 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
+
+var validate = validator.New()
 
 func handleGetMembers(c *gin.Context) {
 	members, err := getMembers()
@@ -28,14 +31,29 @@ func handleGetMemberByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"data": member})
 }
 
-// func handlePostMember(c *gin.Context) {
-// 	var newMember Member
+func handlePostMember(c *gin.Context) {
+	var memberData Member
 
-// 	if err := c.BindJSON(&newMember); err != nil {
-// 		return
-// 	}
+	err := c.BindJSON(&memberData)
 
-// 	members = append(members, newMember)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMember.ID})
-// }
+	err = validate.Struct(&memberData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	newMemberID, err := createMember(memberData)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	}
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"data": newMemberID})
+}

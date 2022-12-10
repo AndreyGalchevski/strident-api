@@ -57,3 +57,18 @@ func getLyricByID(id string) (Lyric, error) {
 
 	return lyric, nil
 }
+
+func createLyric(lyricData Lyric) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	lyricData.ID = primitive.NewObjectID()
+
+	result, err := lyricsCollection.InsertOne(ctx, lyricData)
+
+	if err != nil {
+		return "", err
+	}
+
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+}
