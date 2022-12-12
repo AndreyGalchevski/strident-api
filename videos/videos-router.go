@@ -5,10 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitVideosRouter(router *gin.Engine) {
-	router.GET("/videos", handleGetVideos)
-	router.Use(auth.VerifyAuthorization).GET("/videos/:id", handleGetVideoByID)
-	router.Use(auth.VerifyAuthorization).POST("/videos", handlePostVideo)
-	router.Use(auth.VerifyAuthorization).PATCH("/videos/:id", handlePatchVideo)
-	router.Use(auth.VerifyAuthorization).DELETE("/videos/:id", handleDeleteVideo)
+func InitVideosRouter(r *gin.Engine) {
+	r.GET("/videos", handleGetVideos)
+
+	authorized := r.Group("/")
+
+	authorized.Use(auth.VerifyAuthorization())
+	{
+		authorized.GET("/videos/:id", handleGetVideoByID)
+		authorized.POST("/videos", handlePostVideo)
+		authorized.PATCH("/videos/:id", handlePatchVideo)
+		authorized.DELETE("/videos/:id", handleDeleteVideo)
+	}
 }

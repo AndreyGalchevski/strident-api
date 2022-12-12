@@ -5,10 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitSongsRouter(router *gin.Engine) {
-	router.GET("/songs", handleGetSongs)
-	router.Use(auth.VerifyAuthorization).GET("/songs/:id", handleGetSongByID)
-	router.Use(auth.VerifyAuthorization).POST("/songs", handlePostSong)
-	router.Use(auth.VerifyAuthorization).PATCH("/songs/:id", handlePatchSong)
-	router.Use(auth.VerifyAuthorization).DELETE("/songs/:id", handleDeleteSong)
+func InitSongsRouter(r *gin.Engine) {
+	r.GET("/songs", handleGetSongs)
+
+	authorized := r.Group("/")
+
+	authorized.Use(auth.VerifyAuthorization())
+	{
+		authorized.GET("/songs/:id", handleGetSongByID)
+		authorized.POST("/songs", handlePostSong)
+		authorized.PATCH("/songs/:id", handlePatchSong)
+		authorized.DELETE("/songs/:id", handleDeleteSong)
+	}
 }

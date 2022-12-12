@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var TokenMaxAge = 5 * time.Minute
+var TokenMaxAge = 10 * time.Minute
 
 const WRONG_CREDENTIALS_ERROR = "that's not the right password"
 

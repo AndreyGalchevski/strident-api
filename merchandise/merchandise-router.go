@@ -5,10 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitMerchandiseRouter(router *gin.Engine) {
-	router.GET("/merchandise", handleGetMerchandise)
-	router.Use(auth.VerifyAuthorization).GET("/merchandise/:id", handleGetMerchandiseByID)
-	router.Use(auth.VerifyAuthorization).POST("/merchandise", handlePostMerchandise)
-	router.Use(auth.VerifyAuthorization).POST("/merchandise/:id", handlePatchMerchandise)
-	router.Use(auth.VerifyAuthorization).DELETE("/merchandise/:id", handleDeleteMerchandise)
+func InitMerchandiseRouter(r *gin.Engine) {
+	r.GET("/merchandise", handleGetMerchandise)
+
+	authorized := r.Group("/")
+
+	authorized.Use(auth.VerifyAuthorization())
+	{
+		authorized.GET("/merchandise/:id", handleGetMerchandiseByID)
+		authorized.POST("/merchandise", handlePostMerchandise)
+		authorized.POST("/merchandise/:id", handlePatchMerchandise)
+		authorized.DELETE("/merchandise/:id", handleDeleteMerchandise)
+	}
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const AUTH_COOKIE_NAME = "stridentToken"
+
 type Credentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -32,7 +34,7 @@ func handlePostLogin(c *gin.Context) {
 	}
 
 	c.SetCookie(
-		"stridentToken",
+		AUTH_COOKIE_NAME,
 		token,
 		int(TokenMaxAge.Seconds()),
 		"",
@@ -42,13 +44,13 @@ func handlePostLogin(c *gin.Context) {
 	)
 }
 
-func handlePostVerify(c *gin.Context) {
-	username, err := VerifyToken(c.Param("token"))
+func handleGetVerify(c *gin.Context) {
+	_, err := c.Cookie(AUTH_COOKIE_NAME)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": username})
+	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
 }

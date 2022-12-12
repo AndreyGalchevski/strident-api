@@ -5,10 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitGigsRouter(router *gin.Engine) {
-	router.GET("/gigs", handleGetGigs)
-	router.Use(auth.VerifyAuthorization).GET("/gigs/:id", handleGetGigByID)
-	router.Use(auth.VerifyAuthorization).POST("/gigs", handlePostGig)
-	router.Use(auth.VerifyAuthorization).PATCH("/gigs/:id", handlePatchGig)
-	router.Use(auth.VerifyAuthorization).DELETE("/gigs/:id", handleDeleteGig)
+func InitGigsRouter(r *gin.Engine) {
+	r.GET("/gigs", handleGetGigs)
+
+	authorized := r.Group("/")
+
+	authorized.Use(auth.VerifyAuthorization())
+	{
+		authorized.GET("/gigs/:id", handleGetGigByID)
+		authorized.POST("/gigs", handlePostGig)
+		authorized.PATCH("/gigs/:id", handlePatchGig)
+		authorized.DELETE("/gigs/:id", handleDeleteGig)
+	}
 }

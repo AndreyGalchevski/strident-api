@@ -5,10 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitMembersRouter(router *gin.Engine) {
-	router.GET("/members", handleGetMembers)
-	router.Use(auth.VerifyAuthorization).GET("/members/:id", handleGetMemberByID)
-	router.Use(auth.VerifyAuthorization).POST("/members", handlePostMember)
-	router.Use(auth.VerifyAuthorization).PATCH("/members/:id", handlePatchMember)
-	router.Use(auth.VerifyAuthorization).DELETE("/members/:id", handleDeleteMember)
+func InitMembersRouter(r *gin.Engine) {
+	r.GET("/members", handleGetMembers)
+
+	authorized := r.Group("/")
+
+	authorized.Use(auth.VerifyAuthorization())
+	{
+		authorized.GET("/members/:id", handleGetMemberByID)
+		authorized.POST("/members", handlePostMember)
+		authorized.PATCH("/members/:id", handlePatchMember)
+		authorized.DELETE("/members/:id", handleDeleteMember)
+	}
 }

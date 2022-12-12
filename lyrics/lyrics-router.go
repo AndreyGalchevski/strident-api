@@ -5,10 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitLyricsRouter(router *gin.Engine) {
-	router.GET("/lyrics", handleGetLyrics)
-	router.Use(auth.VerifyAuthorization).GET("/lyrics/:id", handleGetLyricByID)
-	router.Use(auth.VerifyAuthorization).POST("/lyrics", handlePostLyric)
-	router.Use(auth.VerifyAuthorization).PATCH("/lyrics/:id", handlePatchLyric)
-	router.Use(auth.VerifyAuthorization).DELETE("/lyrics/:id", handleDeleteLyric)
+func InitLyricsRouter(r *gin.Engine) {
+	r.GET("/lyrics", handleGetLyrics)
+
+	authorized := r.Group("/")
+
+	authorized.Use(auth.VerifyAuthorization())
+	{
+		authorized.GET("/lyrics/:id", handleGetLyricByID)
+		authorized.POST("/lyrics", handlePostLyric)
+		authorized.PATCH("/lyrics/:id", handlePatchLyric)
+		authorized.DELETE("/lyrics/:id", handleDeleteLyric)
+	}
 }
