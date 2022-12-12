@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +27,19 @@ func handlePostLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": token})
+	if os.Getenv("APP_ENV") == "production" {
+		c.SetSameSite(http.SameSiteStrictMode)
+	}
+
+	c.SetCookie(
+		"stridentToken",
+		token,
+		int(TokenMaxAge.Seconds()),
+		"",
+		"",
+		os.Getenv("APP_ENV") == "production",
+		true,
+	)
 }
 
 func handlePostVerify(c *gin.Context) {

@@ -1,11 +1,14 @@
 package songs
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/AndreyGalchevski/strident-api/auth"
+	"github.com/gin-gonic/gin"
+)
 
 func InitSongsRouter(router *gin.Engine) {
 	router.GET("/songs", handleGetSongs)
-	router.GET("/songs/:id", handleGetSongByID)
-	router.POST("/songs", handlePostSong)
-	router.PATCH("/songs/:id", handlePatchSong)
-	router.DELETE("/songs/:id", handleDeleteSong)
+	router.Use(auth.VerifyAuthorization).GET("/songs/:id", handleGetSongByID)
+	router.Use(auth.VerifyAuthorization).POST("/songs", handlePostSong)
+	router.Use(auth.VerifyAuthorization).PATCH("/songs/:id", handlePatchSong)
+	router.Use(auth.VerifyAuthorization).DELETE("/songs/:id", handleDeleteSong)
 }

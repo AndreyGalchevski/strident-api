@@ -23,7 +23,8 @@ func main() {
 	}
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{os.Getenv("APP_URL")}
+	config.AllowOrigins = []string{os.Getenv("WEB_APP_URL")}
+	config.AllowCredentials = true
 
 	router := gin.Default()
 
