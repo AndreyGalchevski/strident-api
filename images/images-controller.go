@@ -25,7 +25,7 @@ func HandleUploadImage(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": gin.H{"data": imageURL}})
+	c.JSON(http.StatusCreated, gin.H{"data": imageURL})
 }
 
 type DeleteImageBody struct {
