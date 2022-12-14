@@ -29,7 +29,7 @@ func handlePostLogin(c *gin.Context) {
 		return
 	}
 
-	if os.Getenv("APP_ENV") == "production" {
+	if os.Getenv("APP_ENV") == "prod" {
 		c.SetSameSite(http.SameSiteStrictMode)
 	}
 
@@ -39,7 +39,7 @@ func handlePostLogin(c *gin.Context) {
 		int(TokenMaxAge.Seconds()),
 		"",
 		"",
-		os.Getenv("APP_ENV") == "production",
+		os.Getenv("APP_ENV") == "prod",
 		true,
 	)
 }
