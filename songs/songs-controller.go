@@ -32,23 +32,23 @@ func handleGetSongByID(c *gin.Context) {
 }
 
 func handlePostSong(c *gin.Context) {
-	var songData Song
+	var params SongFormData
 
-	err := c.BindJSON(&songData)
+	err := c.BindJSON(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&songData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
-	newSongID, err := createSong(songData)
+	newSongID, err := createSong(params)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

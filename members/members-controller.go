@@ -32,16 +32,16 @@ func handleGetMemberByID(c *gin.Context) {
 }
 
 func handlePostMember(c *gin.Context) {
-	var memberData CreateMemberParams
+	var params MemberFormData
 
-	err := c.Bind(&memberData)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&memberData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
@@ -55,7 +55,7 @@ func handlePostMember(c *gin.Context) {
 		return
 	}
 
-	newMemberID, err := createMember(memberData, image)
+	newMemberID, err := createMember(params, image)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

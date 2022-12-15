@@ -58,11 +58,14 @@ func getVideoByID(id string) (Video, error) {
 	return video, nil
 }
 
-func createVideo(videoData Video) (string, error) {
+func createVideo(params VideoFormData) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	var videoData Video
 	videoData.ID = primitive.NewObjectID()
+	videoData.Name = params.Name
+	videoData.URL = params.URL
 
 	result, err := videosCollection.InsertOne(ctx, videoData)
 

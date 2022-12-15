@@ -32,23 +32,23 @@ func handleGetLyricByID(c *gin.Context) {
 }
 
 func handlePostLyric(c *gin.Context) {
-	var lyricData Lyric
+	var params LyricFormData
 
-	err := c.BindJSON(&lyricData)
+	err := c.BindJSON(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&lyricData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
-	newLyricID, err := createLyric(lyricData)
+	newLyricID, err := createLyric(params)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

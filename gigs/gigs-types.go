@@ -2,7 +2,7 @@ package gigs
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type CreateGigParams struct {
+type GigFormData struct {
 	Name    string `form:"name" validate:"required"`
 	Venue   string `form:"venue" validate:"required"`
 	Address string `form:"address" validate:"required"`

@@ -61,7 +61,7 @@ func getMerchandiseByID(id string) (Merchandise, error) {
 	return merchandise, nil
 }
 
-func createMerchandise(params CreateMerchandiseParams, image multipart.File) (string, error) {
+func createMerchandise(params MerchandiseFormData, image multipart.File) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

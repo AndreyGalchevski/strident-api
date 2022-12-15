@@ -61,7 +61,7 @@ func getMemberByID(id string) (Member, error) {
 	return member, nil
 }
 
-func createMember(params CreateMemberParams, image multipart.File) (string, error) {
+func createMember(params MemberFormData, image multipart.File) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

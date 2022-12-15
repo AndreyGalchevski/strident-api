@@ -58,11 +58,15 @@ func getLyricByID(id string) (Lyric, error) {
 	return lyric, nil
 }
 
-func createLyric(lyricData Lyric) (string, error) {
+func createLyric(params LyricFormData) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	var lyricData Lyric
 	lyricData.ID = primitive.NewObjectID()
+	lyricData.Name = params.Name
+	lyricData.Text = params.Text
+	lyricData.Album = params.Album
 
 	result, err := lyricsCollection.InsertOne(ctx, lyricData)
 

@@ -32,23 +32,23 @@ func handleGetVideoByID(c *gin.Context) {
 }
 
 func handlePostVideo(c *gin.Context) {
-	var videoData Video
+	var params VideoFormData
 
-	err := c.BindJSON(&videoData)
+	err := c.BindJSON(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&videoData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
-	newVideoID, err := createVideo(videoData)
+	newVideoID, err := createVideo(params)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

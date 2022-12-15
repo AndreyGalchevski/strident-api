@@ -61,7 +61,7 @@ func getGigByID(id string) (Gig, error) {
 	return gig, nil
 }
 
-func createGig(params CreateGigParams, image multipart.File) (string, error) {
+func createGig(params GigFormData, image multipart.File) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

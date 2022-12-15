@@ -58,11 +58,15 @@ func getSongByID(id string) (Song, error) {
 	return song, nil
 }
 
-func createSong(songData Song) (string, error) {
+func createSong(params SongFormData) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	var songData Song
 	songData.ID = primitive.NewObjectID()
+	songData.Name = params.Name
+	songData.Album = params.Album
+	songData.URL = params.URL
 
 	result, err := songsCollection.InsertOne(ctx, songData)
 

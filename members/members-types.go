@@ -2,7 +2,7 @@ package members
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type CreateMemberParams struct {
+type MemberFormData struct {
 	Name       string `form:"name" validate:"required"`
 	Instrument string `form:"instrument" validate:"required"`
 }

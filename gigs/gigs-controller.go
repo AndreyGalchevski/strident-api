@@ -32,16 +32,16 @@ func handleGetGigByID(c *gin.Context) {
 }
 
 func handlePostGig(c *gin.Context) {
-	var gigData CreateGigParams
+	var params GigFormData
 
-	err := c.Bind(&gigData)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&gigData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
@@ -55,7 +55,7 @@ func handlePostGig(c *gin.Context) {
 		return
 	}
 
-	newGigID, err := createGig(gigData, image)
+	newGigID, err := createGig(params, image)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
