@@ -28,6 +28,8 @@ func main() {
 
 	router := gin.Default()
 
+	router.MaxMultipartMemory = 8 << 20
+
 	router.Use(cors.New(config))
 
 	auth.InitAuthRouter(router)
