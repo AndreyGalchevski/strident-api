@@ -94,7 +94,7 @@ func createMerchandise(params MerchandiseFormData, image multipart.File) (string
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateMerchandise(merchandiseID string, params MerchandiseFormData) (bool, error) {
+func updateMerchandise(merchandiseID string, params MerchandiseFormData, image multipart.File) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -113,9 +113,36 @@ func updateMerchandise(merchandiseID string, params MerchandiseFormData) (bool, 
 		return false, err
 	}
 
-	ok := result.MatchedCount == 1
+	if result.ModifiedCount != 1 {
+		return false, nil
+	}
 
-	return ok, nil
+	if image != nil {
+		var merchandise Merchandise
+
+		merchandiseCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
+
+		err = images.DeleteImage(merchandise.Image)
+
+		if err != nil {
+			return false, errors.New("failed to delete the old merchandise image")
+		}
+
+		imageURL, err := images.UploadImage("merchandise", image)
+
+		if err != nil {
+			return false, errors.New("failed to upload the new merchandise image")
+		}
+
+		_, err = merchandiseCollection.UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+
+		if err != nil {
+			return false, err
+		}
+
+	}
+
+	return true, nil
 }
 
 func deleteMerchandise(merchandiseD string) (bool, error) {

@@ -83,7 +83,7 @@ func handlePatchVideo(c *gin.Context) {
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Video not found"})
 		return
 	}
 
@@ -99,7 +99,7 @@ func handleDeleteVideo(c *gin.Context) {
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Video not found"})
 		return
 	}
 

@@ -83,7 +83,7 @@ func handlePatchLyric(c *gin.Context) {
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Lyric not found"})
 		return
 	}
 
@@ -99,7 +99,7 @@ func handleDeleteLyric(c *gin.Context) {
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Lyric not found"})
 		return
 	}
 

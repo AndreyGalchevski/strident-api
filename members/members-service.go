@@ -92,7 +92,7 @@ func createMember(params MemberFormData, image multipart.File) (string, error) {
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateMember(memberID string, params MemberFormData) (bool, error) {
+func updateMember(memberID string, params MemberFormData, image multipart.File) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -109,9 +109,36 @@ func updateMember(memberID string, params MemberFormData) (bool, error) {
 		return false, err
 	}
 
-	ok := result.MatchedCount == 1
+	if result.ModifiedCount != 1 {
+		return false, nil
+	}
 
-	return ok, nil
+	if image != nil {
+		var member Member
+
+		membersCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&member)
+
+		err = images.DeleteImage(member.Image)
+
+		if err != nil {
+			return false, errors.New("failed to delete the old member image")
+		}
+
+		imageURL, err := images.UploadImage("members", image)
+
+		if err != nil {
+			return false, errors.New("failed to upload the new member image")
+		}
+
+		_, err = membersCollection.UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+
+		if err != nil {
+			return false, err
+		}
+
+	}
+
+	return true, nil
 }
 
 func deleteMember(memberD string) (bool, error) {

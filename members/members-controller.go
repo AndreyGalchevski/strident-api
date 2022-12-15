@@ -82,7 +82,9 @@ func handlePatchMember(c *gin.Context) {
 		return
 	}
 
-	ok, err := updateMember(c.Param("id"), params)
+	image, _, _ := c.Request.FormFile("image")
+
+	ok, err := updateMember(c.Param("id"), params, image)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -90,7 +92,7 @@ func handlePatchMember(c *gin.Context) {
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Member not found"})
 		return
 	}
 
