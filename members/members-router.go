@@ -1,7 +1,7 @@
 package members
 
 import (
-	// "github.com/AndreyGalchevski/strident-api/auth"
+	"github.com/AndreyGalchevski/strident-api/auth"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,7 +10,7 @@ func InitMembersRouter(r *gin.Engine) {
 
 	authorized := r.Group("/")
 
-	authorized.Use()
+	authorized.Use(auth.VerifyAuthorization())
 	{
 		authorized.GET("/members/:id", handleGetMemberByID)
 		authorized.POST("/members", handlePostMember)

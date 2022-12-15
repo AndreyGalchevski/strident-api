@@ -7,7 +7,6 @@ import (
 	// Importing the db package in order for the connection to be made
 	_ "github.com/AndreyGalchevski/strident-api/db"
 	"github.com/AndreyGalchevski/strident-api/gigs"
-	"github.com/AndreyGalchevski/strident-api/images"
 	"github.com/AndreyGalchevski/strident-api/lyrics"
 	"github.com/AndreyGalchevski/strident-api/members"
 	"github.com/AndreyGalchevski/strident-api/merchandise"
@@ -38,7 +37,6 @@ func main() {
 	merchandise.InitMerchandiseRouter(router)
 	songs.InitSongsRouter(router)
 	videos.InitVideosRouter(router)
-	images.InitImagesRouter((router))
 
 	router.Run("localhost:8080")
 }
