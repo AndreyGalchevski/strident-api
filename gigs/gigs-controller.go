@@ -66,23 +66,25 @@ func handlePostGig(c *gin.Context) {
 }
 
 func handlePatchGig(c *gin.Context) {
-	var gigData Gig
+	var params GigFormData
 
-	err := c.Bind(&gigData)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&gigData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
-	ok, err := updateGig(c.Param("id"), gigData)
+	image, _, _ := c.Request.FormFile("image")
+
+	ok, err := updateGig(c.Param("id"), params, image)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -90,7 +92,7 @@ func handlePatchGig(c *gin.Context) {
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Gig not found"})
 		return
 	}
 
@@ -106,7 +108,7 @@ func handleDeleteGig(c *gin.Context) {
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Gig not found"})
 		return
 	}
 

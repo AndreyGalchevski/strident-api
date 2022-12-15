@@ -77,16 +77,16 @@ func createSong(params SongFormData) (string, error) {
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateSong(songID string, songData Song) (bool, error) {
+func updateSong(songID string, params SongFormData) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(songID)
 
 	update := bson.M{
-		"name":  songData.Name,
-		"url":   songData.URL,
-		"album": songData.Album,
+		"name":  params.Name,
+		"url":   params.URL,
+		"album": params.Album,
 	}
 
 	result, err := songsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})

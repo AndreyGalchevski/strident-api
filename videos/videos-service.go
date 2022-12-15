@@ -76,15 +76,15 @@ func createVideo(params VideoFormData) (string, error) {
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateVideo(videoID string, videoData Video) (bool, error) {
+func updateVideo(videoID string, params VideoFormData) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(videoID)
 
 	update := bson.M{
-		"name": videoData.Name,
-		"url":  videoData.URL,
+		"name": params.Name,
+		"url":  params.URL,
 	}
 
 	result, err := videosCollection.UpdateByID(ctx, objID, bson.M{"$set": update})

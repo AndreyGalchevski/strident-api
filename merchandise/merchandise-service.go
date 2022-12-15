@@ -94,18 +94,17 @@ func createMerchandise(params MerchandiseFormData, image multipart.File) (string
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateMerchandise(merchandiseID string, merchandiseData Merchandise) (bool, error) {
+func updateMerchandise(merchandiseID string, params MerchandiseFormData) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(merchandiseID)
 
 	update := bson.M{
-		"name":  merchandiseData.Name,
-		"type":  merchandiseData.Type,
-		"price": merchandiseData.Price,
-		"url":   merchandiseData.URL,
-		"image": merchandiseData.Image,
+		"name":  params.Name,
+		"type":  params.Type,
+		"price": params.Price,
+		"url":   params.URL,
 	}
 
 	result, err := merchandiseCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
@@ -134,16 +133,20 @@ func deleteMerchandise(merchandiseD string) (bool, error) {
 		return false, err
 	}
 
-	_, err = merchandiseCollection.DeleteOne(ctx, filter)
+	result, err := merchandiseCollection.DeleteOne(ctx, filter)
 
 	if err != nil {
 		return false, err
 	}
 
+	if result.DeletedCount != 1 {
+		return false, nil
+	}
+
 	err = images.DeleteImage(merchandiseToDelete.Image)
 
 	if err != nil {
-		return false, errors.New("unable to delete the merchandise image")
+		return false, errors.New("failed to delete the merchandise image")
 	}
 
 	return true, nil

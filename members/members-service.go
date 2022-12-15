@@ -92,16 +92,15 @@ func createMember(params MemberFormData, image multipart.File) (string, error) {
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateMember(memberID string, memberData Member) (bool, error) {
+func updateMember(memberID string, params MemberFormData) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(memberID)
 
 	update := bson.M{
-		"name":       memberData.Name,
-		"instrument": memberData.Instrument,
-		"image":      memberData.Image,
+		"name":       params.Name,
+		"instrument": params.Instrument,
 	}
 
 	result, err := membersCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
@@ -139,7 +138,7 @@ func deleteMember(memberD string) (bool, error) {
 	err = images.DeleteImage(memberToDelete.Image)
 
 	if err != nil {
-		return false, errors.New("unable to delete the member image")
+		return false, errors.New("failed to delete the member image")
 	}
 
 	return true, nil

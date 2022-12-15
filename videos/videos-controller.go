@@ -59,23 +59,23 @@ func handlePostVideo(c *gin.Context) {
 }
 
 func handlePatchVideo(c *gin.Context) {
-	var videoData Video
+	var params VideoFormData
 
-	err := c.Bind(&videoData)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&videoData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
-	ok, err := updateVideo(c.Param("id"), videoData)
+	ok, err := updateVideo(c.Param("id"), params)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

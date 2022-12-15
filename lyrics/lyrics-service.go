@@ -76,15 +76,15 @@ func createLyric(params LyricFormData) (string, error) {
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateLyric(lyricID string, lyricData Lyric) (bool, error) {
+func updateLyric(lyricID string, params LyricFormData) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(lyricID)
 
 	update := bson.M{
-		"name": lyricData.Name,
-		"text": lyricData.Text,
+		"name": params.Name,
+		"text": params.Text,
 	}
 
 	result, err := lyricsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})

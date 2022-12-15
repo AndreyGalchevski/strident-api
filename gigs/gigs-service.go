@@ -96,20 +96,19 @@ func createGig(params GigFormData, image multipart.File) (string, error) {
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func updateGig(gigID string, gigData Gig) (bool, error) {
+func updateGig(gigID string, params GigFormData, image multipart.File) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(gigID)
 
 	update := bson.M{
-		"name":    gigData.Name,
-		"venue":   gigData.Venue,
-		"address": gigData.Address,
-		"city":    gigData.City,
-		"date":    gigData.Date,
-		"fbEvent": gigData.FBEvent,
-		"image":   gigData.Image,
+		"name":    params.Name,
+		"venue":   params.Venue,
+		"address": params.Address,
+		"city":    params.City,
+		"date":    params.Date,
+		"fbEvent": params.FBEvent,
 	}
 
 	result, err := gigsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
@@ -118,9 +117,36 @@ func updateGig(gigID string, gigData Gig) (bool, error) {
 		return false, err
 	}
 
-	ok := result.MatchedCount == 1
+	if result.ModifiedCount != 1 {
+		return false, nil
+	}
 
-	return ok, nil
+	if image != nil {
+		var gig Gig
+
+		gigsCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&gig)
+
+		err = images.DeleteImage(gig.Image)
+
+		if err != nil {
+			return false, errors.New("failed to delete the old gig image")
+		}
+
+		imageURL, err := images.UploadImage("gigs", image)
+
+		if err != nil {
+			return false, errors.New("failed to upload the new gig image")
+		}
+
+		_, err = gigsCollection.UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+
+		if err != nil {
+			return false, err
+		}
+
+	}
+
+	return true, nil
 }
 
 func deleteGig(gigID string) (bool, error) {
@@ -138,16 +164,20 @@ func deleteGig(gigID string) (bool, error) {
 		return false, err
 	}
 
-	_, err = gigsCollection.DeleteOne(ctx, filter)
+	result, err := gigsCollection.DeleteOne(ctx, filter)
 
 	if err != nil {
 		return false, err
 	}
 
+	if result.DeletedCount != 1 {
+		return false, nil
+	}
+
 	err = images.DeleteImage(gigToDelete.Image)
 
 	if err != nil {
-		return false, errors.New("unable to delete the gig image")
+		return false, errors.New("failed to delete the gig image")
 	}
 
 	return true, nil

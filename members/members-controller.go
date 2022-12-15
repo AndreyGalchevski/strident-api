@@ -66,23 +66,23 @@ func handlePostMember(c *gin.Context) {
 }
 
 func handlePatchMember(c *gin.Context) {
-	var memberData Member
+	var params MemberFormData
 
-	err := c.Bind(&memberData)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&memberData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
-	ok, err := updateMember(c.Param("id"), memberData)
+	ok, err := updateMember(c.Param("id"), params)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -66,23 +66,23 @@ func handlePostMerchandise(c *gin.Context) {
 }
 
 func handlePatchMerchandise(c *gin.Context) {
-	var merchandiseData Merchandise
+	var params MerchandiseFormData
 
-	err := c.Bind(&merchandiseData)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = validate.Struct(&merchandiseData)
+	err = validate.Struct(&params)
 
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
-	ok, err := updateMerchandise(c.Param("id"), merchandiseData)
+	ok, err := updateMerchandise(c.Param("id"), params)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
