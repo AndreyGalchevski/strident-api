@@ -13,7 +13,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
-func uploadImage(folderName string, file multipart.File) (string, error) {
+func UploadImage(folderName string, file multipart.File) (string, error) {
 	cld, err := cloudinary.New()
 
 	if err != nil {

@@ -3,6 +3,7 @@ package gigs
 import (
 	"context"
 	"errors"
+	"mime/multipart"
 	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
@@ -60,13 +61,33 @@ func getGigByID(id string) (Gig, error) {
 	return gig, nil
 }
 
-func createGig(gigData Gig) (string, error) {
+func createGig(params CreateGigParams, image multipart.File) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	var gigData Gig
 	gigData.ID = primitive.NewObjectID()
+	gigData.Name = params.Name
+	gigData.Venue = params.Venue
+	gigData.Address = params.Address
+	gigData.City = params.City
+	gigData.Date = params.Date
+	gigData.FBEvent = params.FBEvent
 
 	result, err := gigsCollection.InsertOne(ctx, gigData)
+
+	if err != nil {
+		return "", err
+	}
+
+	imageURL, err := images.UploadImage("gigs", image)
+
+	if err != nil {
+		gigsCollection.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+		return "", err
+	}
+
+	_, err = gigsCollection.UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
 
 	if err != nil {
 		return "", err

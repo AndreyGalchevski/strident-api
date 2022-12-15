@@ -32,9 +32,9 @@ func handleGetGigByID(c *gin.Context) {
 }
 
 func handlePostGig(c *gin.Context) {
-	var gigData Gig
+	var gigData CreateGigParams
 
-	err := c.BindJSON(&gigData)
+	err := c.Bind(&gigData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,7 +48,14 @@ func handlePostGig(c *gin.Context) {
 		return
 	}
 
-	newGigID, err := createGig(gigData)
+	image, _, err := c.Request.FormFile("image")
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	newGigID, err := createGig(gigData, image)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

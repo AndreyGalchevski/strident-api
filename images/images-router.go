@@ -10,7 +10,7 @@ func InitImagesRouter(r *gin.Engine) {
 
 	authorized.Use(auth.VerifyAuthorization())
 	{
-		authorized.POST("/images", HandleUploadImage)
-		authorized.DELETE("/images", HandleDeleteImage)
+		authorized.POST("/images", handlePostImage)
+		authorized.DELETE("/images", handleDeleteImage)
 	}
 }

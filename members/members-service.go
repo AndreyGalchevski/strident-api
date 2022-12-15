@@ -3,6 +3,7 @@ package members
 import (
 	"context"
 	"errors"
+	"mime/multipart"
 	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
@@ -60,13 +61,29 @@ func getMemberByID(id string) (Member, error) {
 	return member, nil
 }
 
-func createMember(memberData Member) (string, error) {
+func createMember(params CreateMemberParams, image multipart.File) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	var memberData Member
 	memberData.ID = primitive.NewObjectID()
+	memberData.Name = params.Name
+	memberData.Instrument = params.Instrument
 
 	result, err := membersCollection.InsertOne(ctx, memberData)
+
+	if err != nil {
+		return "", err
+	}
+
+	imageURL, err := images.UploadImage("members", image)
+
+	if err != nil {
+		membersCollection.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+		return "", err
+	}
+
+	_, err = membersCollection.UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
 
 	if err != nil {
 		return "", err

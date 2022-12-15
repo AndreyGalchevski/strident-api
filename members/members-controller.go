@@ -32,9 +32,9 @@ func handleGetMemberByID(c *gin.Context) {
 }
 
 func handlePostMember(c *gin.Context) {
-	var memberData Member
+	var memberData CreateMemberParams
 
-	err := c.BindJSON(&memberData)
+	err := c.Bind(&memberData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,7 +48,14 @@ func handlePostMember(c *gin.Context) {
 		return
 	}
 
-	newMemberID, err := createMember(memberData)
+	image, _, err := c.Request.FormFile("image")
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	newMemberID, err := createMember(memberData, image)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

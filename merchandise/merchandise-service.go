@@ -3,6 +3,7 @@ package merchandise
 import (
 	"context"
 	"errors"
+	"mime/multipart"
 	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
@@ -60,13 +61,31 @@ func getMerchandiseByID(id string) (Merchandise, error) {
 	return merchandise, nil
 }
 
-func createMerchandise(merchandiseData Merchandise) (string, error) {
+func createMerchandise(params CreateMerchandiseParams, image multipart.File) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	var merchandiseData Merchandise
 	merchandiseData.ID = primitive.NewObjectID()
+	merchandiseData.Name = params.Name
+	merchandiseData.Type = params.Type
+	merchandiseData.Price = params.Price
+	merchandiseData.URL = params.URL
 
 	result, err := merchandiseCollection.InsertOne(ctx, merchandiseData)
+
+	if err != nil {
+		return "", err
+	}
+
+	imageURL, err := images.UploadImage("merchandise", image)
+
+	if err != nil {
+		merchandiseCollection.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+		return "", err
+	}
+
+	_, err = merchandiseCollection.UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
 
 	if err != nil {
 		return "", err

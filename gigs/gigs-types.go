@@ -2,6 +2,15 @@ package gigs
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
+type CreateGigParams struct {
+	Name    string `form:"name" validate:"required"`
+	Venue   string `form:"venue" validate:"required"`
+	Address string `form:"address" validate:"required"`
+	City    string `form:"city" validate:"required"`
+	Date    string `form:"date" validate:"required"`
+	FBEvent string `form:"fbEvent" validate:"required,url"`
+}
+
 type Gig struct {
 	ID      primitive.ObjectID `json:"id,omitempty" bson:"_id"`
 	Name    string             `json:"name,omitempty" validate:"required"`

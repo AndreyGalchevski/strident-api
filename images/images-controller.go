@@ -9,8 +9,15 @@ import (
 
 var validate = validator.New()
 
-func HandleUploadImage(c *gin.Context) {
-	folderName := c.PostForm("folderName")
+type PostImageForm struct {
+	FolderName string `form:"folderName" validate:"required"`
+}
+
+func handlePostImage(c *gin.Context) {
+	var formData PostImageForm
+
+	c.Bind(&formData)
+
 	file, _, err := c.Request.FormFile("file")
 
 	if err != nil {
@@ -18,7 +25,7 @@ func HandleUploadImage(c *gin.Context) {
 		return
 	}
 
-	imageURL, err := uploadImage(folderName, file)
+	imageURL, err := UploadImage(formData.FolderName, file)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -32,7 +39,7 @@ type DeleteImageBody struct {
 	ImageURL string `json:"imageURL" validate:"required"`
 }
 
-func HandleDeleteImage(c *gin.Context) {
+func handleDeleteImage(c *gin.Context) {
 	var params DeleteImageBody
 
 	err := c.BindJSON(&params)

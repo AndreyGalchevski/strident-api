@@ -32,9 +32,9 @@ func handleGetMerchandiseByID(c *gin.Context) {
 }
 
 func handlePostMerchandise(c *gin.Context) {
-	var merchandiseData Merchandise
+	var merchandiseData CreateMerchandiseParams
 
-	err := c.BindJSON(&merchandiseData)
+	err := c.Bind(&merchandiseData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,7 +48,14 @@ func handlePostMerchandise(c *gin.Context) {
 		return
 	}
 
-	newMerchandiseID, err := createMerchandise(merchandiseData)
+	image, _, err := c.Request.FormFile("image")
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	newMerchandiseID, err := createMerchandise(merchandiseData, image)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
