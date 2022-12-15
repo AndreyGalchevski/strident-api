@@ -2,9 +2,11 @@ package merchandise
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
+	"github.com/AndreyGalchevski/strident-api/images"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -103,14 +105,27 @@ func deleteMerchandise(merchandiseD string) (bool, error) {
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(merchandiseD)
+	filter := bson.M{"_id": objID}
 
-	result, err := merchandiseCollection.DeleteOne(ctx, bson.M{"_id": objID})
+	var merchandiseToDelete Merchandise
+
+	err := merchandiseCollection.FindOne(ctx, filter).Decode(&merchandiseToDelete)
 
 	if err != nil {
 		return false, err
 	}
 
-	ok := result.DeletedCount == 1
+	_, err = merchandiseCollection.DeleteOne(ctx, filter)
 
-	return ok, nil
+	if err != nil {
+		return false, err
+	}
+
+	err = images.DeleteImage(merchandiseToDelete.Image)
+
+	if err != nil {
+		return false, errors.New("unable to delete the merchandise image")
+	}
+
+	return true, nil
 }

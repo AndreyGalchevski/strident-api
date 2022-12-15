@@ -49,7 +49,7 @@ func HandleDeleteImage(c *gin.Context) {
 		return
 	}
 
-	err = deleteImage(params.ImageURL)
+	err = DeleteImage(params.ImageURL)
 
 	if err != nil {
 		httpStatus := http.StatusInternalServerError

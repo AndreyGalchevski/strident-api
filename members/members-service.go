@@ -2,9 +2,11 @@ package members
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
+	"github.com/AndreyGalchevski/strident-api/images"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -101,14 +103,27 @@ func deleteMember(memberD string) (bool, error) {
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(memberD)
+	filter := bson.M{"_id": objID}
 
-	result, err := membersCollection.DeleteOne(ctx, bson.M{"_id": objID})
+	var memberToDelete Member
+
+	err := membersCollection.FindOne(ctx, filter).Decode(&memberToDelete)
 
 	if err != nil {
 		return false, err
 	}
 
-	ok := result.DeletedCount == 1
+	_, err = membersCollection.DeleteOne(ctx, filter)
 
-	return ok, nil
+	if err != nil {
+		return false, err
+	}
+
+	err = images.DeleteImage(memberToDelete.Image)
+
+	if err != nil {
+		return false, errors.New("unable to delete the member image")
+	}
+
+	return true, nil
 }

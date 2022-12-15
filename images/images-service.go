@@ -40,7 +40,7 @@ func extractPublicID(imageURL string) string {
 	return strings.Join(relevantPart, "/")
 }
 
-func deleteImage(imageURL string) error {
+func DeleteImage(imageURL string) error {
 	cld, err := cloudinary.New()
 
 	if err != nil {

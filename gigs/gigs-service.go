@@ -2,9 +2,11 @@ package gigs
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
+	"github.com/AndreyGalchevski/strident-api/images"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -105,14 +107,27 @@ func deleteGig(gigID string) (bool, error) {
 	defer cancel()
 
 	objID, _ := primitive.ObjectIDFromHex(gigID)
+	filter := bson.M{"_id": objID}
 
-	result, err := gigsCollection.DeleteOne(ctx, bson.M{"_id": objID})
+	var gigToDelete Gig
+
+	err := gigsCollection.FindOne(ctx, filter).Decode(&gigToDelete)
 
 	if err != nil {
 		return false, err
 	}
 
-	ok := result.DeletedCount == 1
+	_, err = gigsCollection.DeleteOne(ctx, filter)
 
-	return ok, nil
+	if err != nil {
+		return false, err
+	}
+
+	err = images.DeleteImage(gigToDelete.Image)
+
+	if err != nil {
+		return false, errors.New("unable to delete the gig image")
+	}
+
+	return true, nil
 }
