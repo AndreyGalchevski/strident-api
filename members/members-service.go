@@ -109,7 +109,7 @@ func updateMember(memberID string, params MemberFormData, image multipart.File) 
 		return false, err
 	}
 
-	if result.ModifiedCount != 1 {
+	if result.MatchedCount != 1 {
 		return false, nil
 	}
 

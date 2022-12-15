@@ -113,7 +113,7 @@ func updateMerchandise(merchandiseID string, params MerchandiseFormData, image m
 		return false, err
 	}
 
-	if result.ModifiedCount != 1 {
+	if result.MatchedCount != 1 {
 		return false, nil
 	}
 
