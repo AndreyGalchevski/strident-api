@@ -26,7 +26,13 @@ func main() {
 	config.AllowOrigins = []string{os.Getenv("WEB_APP_URL")}
 	config.AllowCredentials = true
 
+	if os.Getenv("APP_ENV") == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.Default()
+
+	router.SetTrustedProxies(nil)
 
 	router.MaxMultipartMemory = 8 << 20
 
