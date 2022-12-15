@@ -34,7 +34,7 @@ func handleGetVideoByID(c *gin.Context) {
 func handlePostVideo(c *gin.Context) {
 	var params VideoFormData
 
-	err := c.BindJSON(&params)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -61,7 +61,7 @@ func handlePostVideo(c *gin.Context) {
 func handlePatchVideo(c *gin.Context) {
 	var videoData Video
 
-	err := c.BindJSON(&videoData)
+	err := c.Bind(&videoData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -68,7 +68,7 @@ func handlePostGig(c *gin.Context) {
 func handlePatchGig(c *gin.Context) {
 	var gigData Gig
 
-	err := c.BindJSON(&gigData)
+	err := c.Bind(&gigData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -68,7 +68,7 @@ func handlePostMember(c *gin.Context) {
 func handlePatchMember(c *gin.Context) {
 	var memberData Member
 
-	err := c.BindJSON(&memberData)
+	err := c.Bind(&memberData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

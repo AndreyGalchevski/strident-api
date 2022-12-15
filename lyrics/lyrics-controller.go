@@ -34,7 +34,7 @@ func handleGetLyricByID(c *gin.Context) {
 func handlePostLyric(c *gin.Context) {
 	var params LyricFormData
 
-	err := c.BindJSON(&params)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -61,7 +61,7 @@ func handlePostLyric(c *gin.Context) {
 func handlePatchLyric(c *gin.Context) {
 	var lyricData Lyric
 
-	err := c.BindJSON(&lyricData)
+	err := c.Bind(&lyricData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

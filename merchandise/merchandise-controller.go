@@ -68,7 +68,7 @@ func handlePostMerchandise(c *gin.Context) {
 func handlePatchMerchandise(c *gin.Context) {
 	var merchandiseData Merchandise
 
-	err := c.BindJSON(&merchandiseData)
+	err := c.Bind(&merchandiseData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

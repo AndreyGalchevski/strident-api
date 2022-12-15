@@ -34,7 +34,7 @@ func handleGetSongByID(c *gin.Context) {
 func handlePostSong(c *gin.Context) {
 	var params SongFormData
 
-	err := c.BindJSON(&params)
+	err := c.Bind(&params)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -61,7 +61,7 @@ func handlePostSong(c *gin.Context) {
 func handlePatchSong(c *gin.Context) {
 	var songData Song
 
-	err := c.BindJSON(&songData)
+	err := c.Bind(&songData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

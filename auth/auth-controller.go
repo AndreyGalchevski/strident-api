@@ -17,7 +17,9 @@ type Credentials struct {
 func handlePostLogin(c *gin.Context) {
 	var credentials Credentials
 
-	if err := c.BindJSON(&credentials); err != nil {
+	err := c.BindJSON(&credentials)
+
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Please try again"})
 		return
 	}

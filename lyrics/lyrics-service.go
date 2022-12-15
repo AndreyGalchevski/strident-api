@@ -66,7 +66,6 @@ func createLyric(params LyricFormData) (string, error) {
 	lyricData.ID = primitive.NewObjectID()
 	lyricData.Name = params.Name
 	lyricData.Text = params.Text
-	lyricData.Album = params.Album
 
 	result, err := lyricsCollection.InsertOne(ctx, lyricData)
 
@@ -84,9 +83,8 @@ func updateLyric(lyricID string, lyricData Lyric) (bool, error) {
 	objID, _ := primitive.ObjectIDFromHex(lyricID)
 
 	update := bson.M{
-		"name":  lyricData.Name,
-		"text":  lyricData.Text,
-		"album": lyricData.Album,
+		"name": lyricData.Name,
+		"text": lyricData.Text,
 	}
 
 	result, err := lyricsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
