@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -50,6 +51,7 @@ func handleGetVerify(c *gin.Context) {
 	_, err := c.Cookie(AUTH_COOKIE_NAME)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
 		return
 	}
