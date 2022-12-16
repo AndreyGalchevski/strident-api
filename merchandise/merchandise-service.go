@@ -13,13 +13,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var merchandiseCollection *mongo.Collection = db.GetCollection(db.DBClient, "merchandise")
+func getMerchandiseCollection() *mongo.Collection {
+	return db.GetCollection(db.GetDBClient(), "merchandise")
+}
 
 func getMerchandise() ([]Merchandise, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	results, err := merchandiseCollection.Find(ctx, bson.M{})
+	results, err := getMerchandiseCollection().Find(ctx, bson.M{})
 
 	var merchandise []Merchandise
 
@@ -52,7 +54,7 @@ func getMerchandiseByID(id string) (Merchandise, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(id)
 
-	err := merchandiseCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
+	err := getMerchandiseCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
 
 	if err != nil {
 		return merchandise, err
@@ -72,7 +74,7 @@ func createMerchandise(params MerchandiseFormData, image multipart.File) (string
 	merchandiseData.Price = params.Price
 	merchandiseData.URL = params.URL
 
-	result, err := merchandiseCollection.InsertOne(ctx, merchandiseData)
+	result, err := getMerchandiseCollection().InsertOne(ctx, merchandiseData)
 
 	if err != nil {
 		return "", err
@@ -81,11 +83,11 @@ func createMerchandise(params MerchandiseFormData, image multipart.File) (string
 	imageURL, err := images.UploadImage("merchandise", image)
 
 	if err != nil {
-		merchandiseCollection.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+		getMerchandiseCollection().DeleteOne(ctx, bson.M{"_id": result.InsertedID})
 		return "", err
 	}
 
-	_, err = merchandiseCollection.UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
+	_, err = getMerchandiseCollection().UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
 
 	if err != nil {
 		return "", err
@@ -107,7 +109,7 @@ func updateMerchandise(merchandiseID string, params MerchandiseFormData, image m
 		"url":   params.URL,
 	}
 
-	result, err := merchandiseCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+	result, err := getMerchandiseCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
 
 	if err != nil {
 		return false, err
@@ -120,7 +122,7 @@ func updateMerchandise(merchandiseID string, params MerchandiseFormData, image m
 	if image != nil {
 		var merchandise Merchandise
 
-		merchandiseCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
+		getMerchandiseCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
 
 		err = images.DeleteImage(merchandise.Image)
 
@@ -134,7 +136,7 @@ func updateMerchandise(merchandiseID string, params MerchandiseFormData, image m
 			return false, errors.New("failed to upload the new merchandise image")
 		}
 
-		_, err = merchandiseCollection.UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+		_, err = getMerchandiseCollection().UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
 
 		if err != nil {
 			return false, err
@@ -154,13 +156,13 @@ func deleteMerchandise(merchandiseD string) (bool, error) {
 
 	var merchandiseToDelete Merchandise
 
-	err := merchandiseCollection.FindOne(ctx, filter).Decode(&merchandiseToDelete)
+	err := getMerchandiseCollection().FindOne(ctx, filter).Decode(&merchandiseToDelete)
 
 	if err != nil {
 		return false, err
 	}
 
-	result, err := merchandiseCollection.DeleteOne(ctx, filter)
+	result, err := getMerchandiseCollection().DeleteOne(ctx, filter)
 
 	if err != nil {
 		return false, err

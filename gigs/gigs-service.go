@@ -15,7 +15,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var gigsCollection *mongo.Collection = db.GetCollection(db.DBClient, "gigs")
+func getGigsCollection() *mongo.Collection {
+	return db.GetCollection(db.GetDBClient(), "gigs")
+}
 
 func getGigs() ([]Gig, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -23,7 +25,7 @@ func getGigs() ([]Gig, error) {
 
 	opts := options.Find().SetSort(bson.D{{Key: "date", Value: -1}})
 
-	results, err := gigsCollection.Find(ctx, bson.M{}, opts)
+	results, err := getGigsCollection().Find(ctx, bson.M{}, opts)
 
 	var gigs []Gig
 
@@ -56,7 +58,7 @@ func getGigByID(id string) (Gig, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(id)
 
-	err := gigsCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&gig)
+	err := getGigsCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&gig)
 
 	if err != nil {
 		return gig, err
@@ -84,7 +86,7 @@ func createGig(params GigFormData, image multipart.File) (string, error) {
 	gigData.Date = primitive.NewDateTimeFromTime(time.UnixMilli(timestamp))
 	gigData.FBEvent = params.FBEvent
 
-	result, err := gigsCollection.InsertOne(ctx, gigData)
+	result, err := getGigsCollection().InsertOne(ctx, gigData)
 
 	if err != nil {
 		return "", err
@@ -93,11 +95,11 @@ func createGig(params GigFormData, image multipart.File) (string, error) {
 	imageURL, err := images.UploadImage("gigs", image)
 
 	if err != nil {
-		gigsCollection.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+		getGigsCollection().DeleteOne(ctx, bson.M{"_id": result.InsertedID})
 		return "", err
 	}
 
-	_, err = gigsCollection.UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
+	_, err = getGigsCollection().UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
 
 	if err != nil {
 		return "", err
@@ -126,7 +128,7 @@ func updateGig(gigID string, params GigFormData, image multipart.File) (bool, er
 		"fbEvent": params.FBEvent,
 	}
 
-	result, err := gigsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+	result, err := getGigsCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
 
 	if err != nil {
 		return false, err
@@ -139,7 +141,7 @@ func updateGig(gigID string, params GigFormData, image multipart.File) (bool, er
 	if image != nil {
 		var gig Gig
 
-		gigsCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&gig)
+		getGigsCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&gig)
 
 		err = images.DeleteImage(gig.Image)
 
@@ -153,7 +155,7 @@ func updateGig(gigID string, params GigFormData, image multipart.File) (bool, er
 			return false, errors.New("failed to upload the new gig image")
 		}
 
-		_, err = gigsCollection.UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+		_, err = getGigsCollection().UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
 
 		if err != nil {
 			return false, err
@@ -173,13 +175,13 @@ func deleteGig(gigID string) (bool, error) {
 
 	var gigToDelete Gig
 
-	err := gigsCollection.FindOne(ctx, filter).Decode(&gigToDelete)
+	err := getGigsCollection().FindOne(ctx, filter).Decode(&gigToDelete)
 
 	if err != nil {
 		return false, err
 	}
 
-	result, err := gigsCollection.DeleteOne(ctx, filter)
+	result, err := getGigsCollection().DeleteOne(ctx, filter)
 
 	if err != nil {
 		return false, err

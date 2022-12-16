@@ -4,8 +4,7 @@ import (
 	"os"
 
 	"github.com/AndreyGalchevski/strident-api/auth"
-	// Importing the db package in order for the connection to be made
-	_ "github.com/AndreyGalchevski/strident-api/db"
+	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/AndreyGalchevski/strident-api/gigs"
 	"github.com/AndreyGalchevski/strident-api/lyrics"
 	"github.com/AndreyGalchevski/strident-api/members"
@@ -23,6 +22,8 @@ func main() {
 	if err != nil && err.Error() != "open .env: no such file or directory" {
 		panic("Error loading .env file: " + err.Error())
 	}
+
+	db.Connect()
 
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{os.Getenv("WEB_APP_URL")}
@@ -48,5 +49,5 @@ func main() {
 	songs.InitSongsRouter(router)
 	videos.InitVideosRouter(router)
 
-	router.Run("localhost:8080")
+	router.Run()
 }

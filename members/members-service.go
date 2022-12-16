@@ -13,13 +13,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var membersCollection *mongo.Collection = db.GetCollection(db.DBClient, "members")
+func getMembersCollection() *mongo.Collection {
+	return db.GetCollection(db.GetDBClient(), "members")
+}
 
 func getMembers() ([]Member, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	results, err := membersCollection.Find(ctx, bson.M{})
+	results, err := getMembersCollection().Find(ctx, bson.M{})
 
 	var members []Member
 
@@ -52,7 +54,7 @@ func getMemberByID(id string) (Member, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(id)
 
-	err := membersCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&member)
+	err := getMembersCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&member)
 
 	if err != nil {
 		return member, err
@@ -70,7 +72,7 @@ func createMember(params MemberFormData, image multipart.File) (string, error) {
 	memberData.Name = params.Name
 	memberData.Instrument = params.Instrument
 
-	result, err := membersCollection.InsertOne(ctx, memberData)
+	result, err := getMembersCollection().InsertOne(ctx, memberData)
 
 	if err != nil {
 		return "", err
@@ -79,11 +81,11 @@ func createMember(params MemberFormData, image multipart.File) (string, error) {
 	imageURL, err := images.UploadImage("members", image)
 
 	if err != nil {
-		membersCollection.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+		getMembersCollection().DeleteOne(ctx, bson.M{"_id": result.InsertedID})
 		return "", err
 	}
 
-	_, err = membersCollection.UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
+	_, err = getMembersCollection().UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
 
 	if err != nil {
 		return "", err
@@ -103,7 +105,7 @@ func updateMember(memberID string, params MemberFormData, image multipart.File) 
 		"instrument": params.Instrument,
 	}
 
-	result, err := membersCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+	result, err := getMembersCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
 
 	if err != nil {
 		return false, err
@@ -116,7 +118,7 @@ func updateMember(memberID string, params MemberFormData, image multipart.File) 
 	if image != nil {
 		var member Member
 
-		membersCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&member)
+		getMembersCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&member)
 
 		err = images.DeleteImage(member.Image)
 
@@ -130,7 +132,7 @@ func updateMember(memberID string, params MemberFormData, image multipart.File) 
 			return false, errors.New("failed to upload the new member image")
 		}
 
-		_, err = membersCollection.UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+		_, err = getMembersCollection().UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
 
 		if err != nil {
 			return false, err
@@ -150,13 +152,13 @@ func deleteMember(memberD string) (bool, error) {
 
 	var memberToDelete Member
 
-	err := membersCollection.FindOne(ctx, filter).Decode(&memberToDelete)
+	err := getMembersCollection().FindOne(ctx, filter).Decode(&memberToDelete)
 
 	if err != nil {
 		return false, err
 	}
 
-	_, err = membersCollection.DeleteOne(ctx, filter)
+	_, err = getMembersCollection().DeleteOne(ctx, filter)
 
 	if err != nil {
 		return false, err

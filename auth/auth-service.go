@@ -18,7 +18,9 @@ var TokenMaxAge = 10 * time.Minute
 
 const WRONG_CREDENTIALS_ERROR = "that's not the right password"
 
-var usersCollection *mongo.Collection = db.GetCollection(db.DBClient, "users")
+func getUsersCollection() *mongo.Collection {
+	return db.GetCollection(db.GetDBClient(), "users")
+}
 
 func login(credentials Credentials) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -26,7 +28,7 @@ func login(credentials Credentials) (string, error) {
 
 	var user User
 
-	err := usersCollection.FindOne(ctx, bson.M{"email": credentials.Email}).Decode(&user)
+	err := getUsersCollection().FindOne(ctx, bson.M{"email": credentials.Email}).Decode(&user)
 
 	if err != nil {
 		if err.Error() == "mongo: no documents in result" {
@@ -102,7 +104,7 @@ func VerifyToken(candidate string) (string, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(claims.UserID)
 
-	err = usersCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&user)
+	err = getUsersCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&user)
 
 	if err != nil {
 		return "", err

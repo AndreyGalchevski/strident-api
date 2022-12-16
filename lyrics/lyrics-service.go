@@ -10,13 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var lyricsCollection *mongo.Collection = db.GetCollection(db.DBClient, "lyrics")
+func getLyricsCollection() *mongo.Collection {
+	return db.GetCollection(db.GetDBClient(), "lyrics")
+}
 
 func getLyrics() ([]Lyric, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	results, err := lyricsCollection.Find(ctx, bson.M{})
+	results, err := getLyricsCollection().Find(ctx, bson.M{})
 
 	var lyrics []Lyric
 
@@ -49,7 +51,7 @@ func getLyricByID(id string) (Lyric, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(id)
 
-	err := lyricsCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&lyric)
+	err := getLyricsCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&lyric)
 
 	if err != nil {
 		return lyric, err
@@ -67,7 +69,7 @@ func createLyric(params LyricFormData) (string, error) {
 	lyricData.Name = params.Name
 	lyricData.Text = params.Text
 
-	result, err := lyricsCollection.InsertOne(ctx, lyricData)
+	result, err := getLyricsCollection().InsertOne(ctx, lyricData)
 
 	if err != nil {
 		return "", err
@@ -87,7 +89,7 @@ func updateLyric(lyricID string, params LyricFormData) (bool, error) {
 		"text": params.Text,
 	}
 
-	result, err := lyricsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+	result, err := getLyricsCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
 
 	if err != nil {
 		return false, err
@@ -104,7 +106,7 @@ func deleteLyric(lyricID string) (bool, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(lyricID)
 
-	result, err := lyricsCollection.DeleteOne(ctx, bson.M{"_id": objID})
+	result, err := getLyricsCollection().DeleteOne(ctx, bson.M{"_id": objID})
 
 	if err != nil {
 		return false, err

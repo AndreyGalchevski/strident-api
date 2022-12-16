@@ -10,13 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var songsCollection *mongo.Collection = db.GetCollection(db.DBClient, "songs")
+func getSongsCollection() *mongo.Collection {
+	return db.GetCollection(db.GetDBClient(), "songs")
+}
 
 func getSongs() ([]Song, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	results, err := songsCollection.Find(ctx, bson.M{})
+	results, err := getSongsCollection().Find(ctx, bson.M{})
 
 	var songs []Song
 
@@ -49,7 +51,7 @@ func getSongByID(id string) (Song, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(id)
 
-	err := songsCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&song)
+	err := getSongsCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&song)
 
 	if err != nil {
 		return song, err
@@ -68,7 +70,7 @@ func createSong(params SongFormData) (string, error) {
 	songData.Album = params.Album
 	songData.URL = params.URL
 
-	result, err := songsCollection.InsertOne(ctx, songData)
+	result, err := getSongsCollection().InsertOne(ctx, songData)
 
 	if err != nil {
 		return "", err
@@ -89,7 +91,7 @@ func updateSong(songID string, params SongFormData) (bool, error) {
 		"album": params.Album,
 	}
 
-	result, err := songsCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+	result, err := getSongsCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
 
 	if err != nil {
 		return false, err
@@ -106,7 +108,7 @@ func deleteSong(songID string) (bool, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(songID)
 
-	result, err := songsCollection.DeleteOne(ctx, bson.M{"_id": objID})
+	result, err := getSongsCollection().DeleteOne(ctx, bson.M{"_id": objID})
 
 	if err != nil {
 		return false, err

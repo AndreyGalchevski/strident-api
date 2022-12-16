@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -13,13 +12,7 @@ import (
 
 var ctx = context.TODO()
 
-func Connect() *mongo.Client {
-	err := godotenv.Load()
-
-	if err != nil && err.Error() != "open .env: no such file or directory" {
-		panic("Can't load env vars for DB connection: " + err.Error())
-	}
-
+func Connect() {
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("DB_URI")))
 
 	if err != nil {
@@ -32,10 +25,14 @@ func Connect() *mongo.Client {
 
 	fmt.Println("Successfully connected and pinged.")
 
-	return client
+	dbClient = client
 }
 
-var DBClient *mongo.Client = Connect()
+var dbClient *mongo.Client
+
+func GetDBClient() *mongo.Client {
+	return dbClient
+}
 
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	collection := client.Database("main").Collection(collectionName)

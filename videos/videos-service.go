@@ -10,13 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var videosCollection *mongo.Collection = db.GetCollection(db.DBClient, "videos")
+func getVideosCollection() *mongo.Collection {
+	return db.GetCollection(db.GetDBClient(), "videos")
+}
 
 func getVideos() ([]Video, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	results, err := videosCollection.Find(ctx, bson.M{})
+	results, err := getVideosCollection().Find(ctx, bson.M{})
 
 	var videos []Video
 
@@ -49,7 +51,7 @@ func getVideoByID(id string) (Video, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(id)
 
-	err := videosCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&video)
+	err := getVideosCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&video)
 
 	if err != nil {
 		return video, err
@@ -67,7 +69,7 @@ func createVideo(params VideoFormData) (string, error) {
 	videoData.Name = params.Name
 	videoData.URL = params.URL
 
-	result, err := videosCollection.InsertOne(ctx, videoData)
+	result, err := getVideosCollection().InsertOne(ctx, videoData)
 
 	if err != nil {
 		return "", err
@@ -87,7 +89,7 @@ func updateVideo(videoID string, params VideoFormData) (bool, error) {
 		"url":  params.URL,
 	}
 
-	result, err := videosCollection.UpdateByID(ctx, objID, bson.M{"$set": update})
+	result, err := getVideosCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
 
 	if err != nil {
 		return false, err
@@ -104,7 +106,7 @@ func deleteVideo(videoID string) (bool, error) {
 
 	objID, _ := primitive.ObjectIDFromHex(videoID)
 
-	result, err := videosCollection.DeleteOne(ctx, bson.M{"_id": objID})
+	result, err := getVideosCollection().DeleteOne(ctx, bson.M{"_id": objID})
 
 	if err != nil {
 		return false, err
