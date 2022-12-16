@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/AndreyGalchevski/strident-api/auth"
@@ -39,6 +40,13 @@ func main() {
 		AllowedOrigins:     []string{os.Getenv("WEB_APP_URL")},
 		AllowCredentials:   true,
 		OptionsPassthrough: false,
+		AllowedMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPatch,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
 	}
 
 	router.Use(cors.New(corsConfig))
