@@ -14,7 +14,7 @@ func InitMerchandiseRouter(r *gin.Engine) {
 	{
 		authorized.GET("/merchandise/:id", handleGetMerchandiseByID)
 		authorized.POST("/merchandise", handlePostMerchandise)
-		authorized.POST("/merchandise/:id", handlePatchMerchandise)
+		authorized.PATCH("/merchandise/:id", handlePatchMerchandise)
 		authorized.DELETE("/merchandise/:id", handleDeleteMerchandise)
 	}
 }
