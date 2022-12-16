@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"mime/multipart"
+	"strconv"
 	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
@@ -11,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var gigsCollection *mongo.Collection = db.GetCollection(db.DBClient, "gigs")
@@ -19,7 +21,9 @@ func getGigs() ([]Gig, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	results, err := gigsCollection.Find(ctx, bson.M{})
+	opts := options.Find().SetSort(bson.D{{Key: "date", Value: -1}})
+
+	results, err := gigsCollection.Find(ctx, bson.M{}, opts)
 
 	var gigs []Gig
 
@@ -65,13 +69,19 @@ func createGig(params GigFormData, image multipart.File) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	timestamp, err := strconv.ParseInt(params.Date, 10, 0)
+
+	if err != nil {
+		return "", err
+	}
+
 	var gigData Gig
 	gigData.ID = primitive.NewObjectID()
 	gigData.Name = params.Name
 	gigData.Venue = params.Venue
 	gigData.Address = params.Address
 	gigData.City = params.City
-	gigData.Date = params.Date
+	gigData.Date = primitive.NewDateTimeFromTime(time.UnixMilli(timestamp))
 	gigData.FBEvent = params.FBEvent
 
 	result, err := gigsCollection.InsertOne(ctx, gigData)
@@ -102,12 +112,17 @@ func updateGig(gigID string, params GigFormData, image multipart.File) (bool, er
 
 	objID, _ := primitive.ObjectIDFromHex(gigID)
 
+	timestamp, err := strconv.ParseInt(params.Date, 10, 0)
+
+	if err != nil {
+		return false, err
+	}
 	update := bson.M{
 		"name":    params.Name,
 		"venue":   params.Venue,
 		"address": params.Address,
 		"city":    params.City,
-		"date":    params.Date,
+		"date":    primitive.NewDateTimeFromTime(time.UnixMilli(timestamp)),
 		"fbEvent": params.FBEvent,
 	}
 
