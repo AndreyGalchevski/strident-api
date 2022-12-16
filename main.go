@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/AndreyGalchevski/strident-api/auth"
@@ -15,6 +16,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+func handlePreflight() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		if c.Request.Method == "OPTIONS" {
+			c.JSON(http.StatusOK, gin.H{})
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func main() {
 	err := godotenv.Load()
@@ -40,6 +53,8 @@ func main() {
 	router.MaxMultipartMemory = 8 << 20
 
 	router.Use(cors.New(config))
+
+	router.Use(handlePreflight())
 
 	auth.InitAuthRouter(router)
 	gigs.InitGigsRouter(router)
