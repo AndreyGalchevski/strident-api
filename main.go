@@ -52,9 +52,9 @@ func main() {
 
 	router.MaxMultipartMemory = 8 << 20
 
-	router.Use(cors.New(config))
-
 	router.Use(handlePreflight())
+
+	router.Use(cors.New(config))
 
 	auth.InitAuthRouter(router)
 	gigs.InitGigsRouter(router)
