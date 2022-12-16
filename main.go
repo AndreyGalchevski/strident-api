@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -36,8 +37,12 @@ func main() {
 
 	router.MaxMultipartMemory = 8 << 20
 
+	webAppURL := os.Getenv("WEB_APP_URL")
+
+	fmt.Println("Allegedly allowed origin: " + webAppURL)
+
 	corsConfig := cors.Options{
-		AllowedOrigins:     []string{os.Getenv("WEB_APP_URL")},
+		AllowedOrigins:     []string{webAppURL},
 		AllowCredentials:   true,
 		OptionsPassthrough: false,
 		AllowedMethods: []string{
