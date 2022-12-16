@@ -15,7 +15,7 @@ var ctx = context.TODO()
 
 func Connect() *mongo.Client {
 	if err := godotenv.Load(); err != nil {
-		panic("Can't load env vars for DB connection")
+		panic("Can't load env vars for DB connection: " + err.Error())
 	}
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("DB_URI")))
