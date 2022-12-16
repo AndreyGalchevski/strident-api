@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/AndreyGalchevski/strident-api/auth"
 	"github.com/AndreyGalchevski/strident-api/db"
@@ -37,12 +37,8 @@ func main() {
 
 	router.MaxMultipartMemory = 8 << 20
 
-	webAppURL := os.Getenv("WEB_APP_URL")
-
-	fmt.Println("Allegedly allowed origin: " + webAppURL)
-
 	corsConfig := cors.Options{
-		AllowedOrigins:     []string{webAppURL},
+		AllowedOrigins:     []string{strings.TrimSuffix(os.Getenv("WEB_APP_URL"), "/")},
 		AllowCredentials:   true,
 		OptionsPassthrough: false,
 		AllowedMethods: []string{
