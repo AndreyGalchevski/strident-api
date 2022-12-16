@@ -48,7 +48,6 @@ func main() {
 			http.MethodDelete,
 			http.MethodOptions,
 		},
-		Debug: true,
 	}
 
 	router.Use(cors.New(corsConfig))
