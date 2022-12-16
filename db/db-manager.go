@@ -14,7 +14,9 @@ import (
 var ctx = context.TODO()
 
 func Connect() *mongo.Client {
-	if err := godotenv.Load(); err != nil {
+	err := godotenv.Load()
+
+	if err != nil && err.Error() != "open .env: no such file or directory" {
 		panic("Can't load env vars for DB connection: " + err.Error())
 	}
 

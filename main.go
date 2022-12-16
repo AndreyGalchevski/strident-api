@@ -18,8 +18,10 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		panic("Error loading .env file")
+	err := godotenv.Load()
+
+	if err != nil && err.Error() != "open .env: no such file or directory" {
+		panic("Error loading .env file: " + err.Error())
 	}
 
 	config := cors.DefaultConfig()
