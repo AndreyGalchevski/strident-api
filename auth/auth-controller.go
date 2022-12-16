@@ -32,9 +32,9 @@ func handlePostLogin(c *gin.Context) {
 		return
 	}
 
-	if os.Getenv("APP_ENV") == "prod" {
-		c.SetSameSite(http.SameSiteStrictMode)
-	}
+	// if os.Getenv("APP_ENV") == "prod" {
+	// 	c.SetSameSite(http.SameSiteStrictMode)
+	// }
 
 	c.SetCookie(
 		AUTH_COOKIE_NAME,
