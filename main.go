@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
 	"github.com/AndreyGalchevski/strident-api/auth"
@@ -12,22 +11,10 @@ import (
 	"github.com/AndreyGalchevski/strident-api/merchandise"
 	"github.com/AndreyGalchevski/strident-api/songs"
 	"github.com/AndreyGalchevski/strident-api/videos"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	cors "github.com/rs/cors/wrapper/gin"
 )
-
-func handlePreflight() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		if c.Request.Method == "OPTIONS" {
-			c.JSON(http.StatusOK, gin.H{})
-			return
-		}
-
-		c.Next()
-	}
-}
 
 func main() {
 	err := godotenv.Load()
@@ -37,10 +24,6 @@ func main() {
 	}
 
 	db.Connect()
-
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{os.Getenv("WEB_APP_URL")}
-	config.AllowCredentials = true
 
 	if os.Getenv("APP_ENV") == "prod" {
 		gin.SetMode(gin.ReleaseMode)
@@ -52,9 +35,13 @@ func main() {
 
 	router.MaxMultipartMemory = 8 << 20
 
-	router.Use(handlePreflight())
+	corsConfig := cors.Options{
+		AllowedOrigins:     []string{os.Getenv("WEB_APP_URL")},
+		AllowCredentials:   true,
+		OptionsPassthrough: false,
+	}
 
-	router.Use(cors.New(config))
+	router.Use(cors.New(corsConfig))
 
 	auth.InitAuthRouter(router)
 	gigs.InitGigsRouter(router)
