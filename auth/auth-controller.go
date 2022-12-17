@@ -36,9 +36,9 @@ func handlePostLogin(c *gin.Context) {
 
 	isProd := os.Getenv("APP_ENV") == "prod"
 
-	if isProd {
-		c.SetSameSite(http.SameSiteStrictMode)
-	}
+	// if isProd {
+	// 	c.SetSameSite(http.SameSiteStrictMode)
+	// }
 
 	domain := ""
 
@@ -56,21 +56,11 @@ func handlePostLogin(c *gin.Context) {
 		AUTH_COOKIE_NAME,
 		token,
 		int(TokenMaxAge.Seconds()),
-		"",
+		"/",
 		domain,
 		isProd,
 		true,
 	)
-
-	cookie, err := c.Cookie(AUTH_COOKIE_NAME)
-
-	if err != nil {
-		fmt.Println("Bad cookie: " + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{})
-		return
-	}
-
-	fmt.Println("Created the cookie: " + cookie)
 }
 
 func handleGetVerify(c *gin.Context) {
