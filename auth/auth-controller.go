@@ -46,7 +46,11 @@ func handlePostLogin(c *gin.Context) {
 		u, _ := url.Parse(os.Getenv("WEB_APP_URL"))
 		parts := strings.Split(u.Hostname(), ".")
 		domain = parts[len(parts)-2] + "." + parts[len(parts)-1]
+
+		fmt.Println("Using cookie domain: " + domain)
 	}
+
+	fmt.Println("Cookie value: " + token)
 
 	c.SetCookie(
 		AUTH_COOKIE_NAME,
@@ -63,10 +67,10 @@ func handlePostLogin(c *gin.Context) {
 	if err != nil {
 		fmt.Println("Bad cookie: " + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
 	}
 
 	fmt.Println("Created the cookie: " + cookie)
-
 }
 
 func handleGetVerify(c *gin.Context) {
