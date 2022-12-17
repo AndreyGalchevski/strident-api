@@ -45,6 +45,16 @@ func handlePostLogin(c *gin.Context) {
 		os.Getenv("APP_ENV") == "prod",
 		true,
 	)
+
+	cookie, err := c.Cookie(AUTH_COOKIE_NAME)
+
+	fmt.Println("Created the cookie: " + cookie)
+
+	if err != nil {
+		fmt.Println("Bad cookie: " + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{})
+	}
+
 }
 
 func handleGetVerify(c *gin.Context) {
