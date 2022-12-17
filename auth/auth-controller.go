@@ -3,7 +3,9 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,28 +34,38 @@ func handlePostLogin(c *gin.Context) {
 		return
 	}
 
-	// if os.Getenv("APP_ENV") == "prod" {
-	// 	c.SetSameSite(http.SameSiteStrictMode)
-	// }
+	isProd := os.Getenv("APP_ENV") == "prod"
+
+	if isProd {
+		c.SetSameSite(http.SameSiteStrictMode)
+	}
+
+	domain := ""
+
+	if isProd {
+		u, _ := url.Parse(os.Getenv("WEB_APP_URL"))
+		parts := strings.Split(u.Hostname(), ".")
+		domain = parts[len(parts)-2] + "." + parts[len(parts)-1]
+	}
 
 	c.SetCookie(
 		AUTH_COOKIE_NAME,
 		token,
 		int(TokenMaxAge.Seconds()),
 		"",
-		"",
-		os.Getenv("APP_ENV") == "prod",
+		domain,
+		isProd,
 		true,
 	)
 
 	cookie, err := c.Cookie(AUTH_COOKIE_NAME)
 
-	fmt.Println("Created the cookie: " + cookie)
-
 	if err != nil {
 		fmt.Println("Bad cookie: " + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{})
 	}
+
+	fmt.Println("Created the cookie: " + cookie)
 
 }
 
