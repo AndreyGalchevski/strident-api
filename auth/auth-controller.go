@@ -35,9 +35,9 @@ func handlePostLogin(c *gin.Context) {
 
 	isProd := os.Getenv("APP_ENV") == "prod"
 
-	// if isProd {
-	// 	c.SetSameSite(http.SameSiteStrictMode)
-	// }
+	if isProd {
+		c.SetSameSite(http.SameSiteNoneMode)
+	}
 
 	domain := ""
 
