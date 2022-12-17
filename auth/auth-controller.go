@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -43,8 +42,6 @@ func handlePostLogin(c *gin.Context) {
 
 	if isProd {
 		domain = strings.TrimSuffix(os.Getenv("WEB_APP_URL"), "/")
-
-		log.Println("Using cookie domain: " + domain)
 	}
 
 	c.SetCookie(
