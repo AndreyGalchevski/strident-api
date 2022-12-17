@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,13 +43,10 @@ func handlePostLogin(c *gin.Context) {
 
 	if isProd {
 		u, _ := url.Parse(os.Getenv("WEB_APP_URL"))
-		parts := strings.Split(u.Hostname(), ".")
-		domain = parts[len(parts)-2] + "." + parts[len(parts)-1]
+		domain = u.Hostname()
 
 		fmt.Println("Using cookie domain: " + domain)
 	}
-
-	fmt.Println("Cookie value: " + token)
 
 	c.SetCookie(
 		AUTH_COOKIE_NAME,
