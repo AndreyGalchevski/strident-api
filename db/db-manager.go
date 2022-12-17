@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,7 +23,7 @@ func Connect() {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected and pinged.")
+	log.Println("Successfully connected to the DB")
 
 	dbClient = client
 }

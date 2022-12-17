@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -43,9 +43,9 @@ func handlePostLogin(c *gin.Context) {
 
 	if isProd {
 		u, _ := url.Parse(os.Getenv("WEB_APP_URL"))
-		domain = u.Hostname()
+		domain = "." + u.Hostname()
 
-		fmt.Println("Using cookie domain: " + domain)
+		log.Println("Using cookie domain: " + domain)
 	}
 
 	c.SetCookie(
@@ -63,7 +63,6 @@ func handleGetVerify(c *gin.Context) {
 	_, err := c.Cookie(AUTH_COOKIE_NAME)
 
 	if err != nil {
-		fmt.Println(err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
 		return
 	}
