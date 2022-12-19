@@ -44,7 +44,7 @@ func handlePostSong(c *gin.Context) {
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
 		return
 	}
 
@@ -71,7 +71,7 @@ func handlePatchSong(c *gin.Context) {
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
 		return
 	}
 
