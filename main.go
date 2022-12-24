@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -38,8 +37,6 @@ func main() {
 
 	router.MaxMultipartMemory = 8 << 20
 
-	log.Println("Allowed origin: " + os.Getenv("WEB_APP_URL"))
-
 	corsConfig := cors.Options{
 		AllowedOrigins:     []string{os.Getenv("WEB_APP_URL")},
 		AllowCredentials:   true,
@@ -51,7 +48,6 @@ func main() {
 			http.MethodDelete,
 			http.MethodOptions,
 		},
-		Debug: true,
 	}
 
 	router.Use(cors.New(corsConfig))
