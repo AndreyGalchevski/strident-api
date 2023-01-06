@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"errors"
 	"os"
 	"time"
@@ -9,8 +8,6 @@ import (
 	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,17 +15,8 @@ var TokenMaxAge = 10 * time.Minute
 
 const WRONG_CREDENTIALS_ERROR = "that's not the right password"
 
-func getUsersCollection() *mongo.Collection {
-	return db.GetCollection(db.GetDBClient(), "users")
-}
-
 func login(credentials Credentials) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	var user User
-
-	err := getUsersCollection().FindOne(ctx, bson.M{"email": credentials.Email}).Decode(&user)
+	user, err := db.GetDB().Users.Find(bson.M{"email": credentials.Email})
 
 	if err != nil {
 		if err.Error() == "mongo: no documents in result" {
@@ -97,14 +85,7 @@ func VerifyToken(candidate string) (string, error) {
 		return "", errors.New("bad token")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	var user User
-
-	objID, _ := primitive.ObjectIDFromHex(claims.UserID)
-
-	err = getUsersCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&user)
+	user, err := db.GetDB().Users.Retrieve(claims.UserID)
 
 	if err != nil {
 		return "", err

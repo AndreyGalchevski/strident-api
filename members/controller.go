@@ -3,6 +3,7 @@ package members
 import (
 	"net/http"
 
+	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -32,7 +33,7 @@ func handleGetMemberByID(c *gin.Context) {
 }
 
 func handlePostMember(c *gin.Context) {
-	var params MemberFormData
+	var params db.Member
 
 	err := c.Bind(&params)
 
@@ -66,7 +67,7 @@ func handlePostMember(c *gin.Context) {
 }
 
 func handlePatchMember(c *gin.Context) {
-	var params MemberFormData
+	var params db.Member
 
 	err := c.Bind(&params)
 

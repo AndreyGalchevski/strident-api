@@ -34,7 +34,7 @@ func GetDBClient() *mongo.Client {
 	return dbClient
 }
 
-func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	collection := client.Database("main").Collection(collectionName)
+func GetCollection(collectionName string) *mongo.Collection {
+	collection := dbClient.Database("main").Collection(collectionName)
 	return collection
 }

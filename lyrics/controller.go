@@ -3,6 +3,7 @@ package lyrics
 import (
 	"net/http"
 
+	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -32,7 +33,7 @@ func handleGetLyricByID(c *gin.Context) {
 }
 
 func handlePostLyric(c *gin.Context) {
-	var params LyricFormData
+	var params db.Lyric
 
 	err := c.Bind(&params)
 
@@ -59,7 +60,7 @@ func handlePostLyric(c *gin.Context) {
 }
 
 func handlePatchLyric(c *gin.Context) {
-	var params LyricFormData
+	var params db.Lyric
 
 	err := c.Bind(&params)
 

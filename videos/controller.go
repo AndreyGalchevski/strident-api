@@ -3,6 +3,7 @@ package videos
 import (
 	"net/http"
 
+	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -32,7 +33,7 @@ func handleGetVideoByID(c *gin.Context) {
 }
 
 func handlePostVideo(c *gin.Context) {
-	var params VideoFormData
+	var params db.Video
 
 	err := c.Bind(&params)
 
@@ -59,7 +60,7 @@ func handlePostVideo(c *gin.Context) {
 }
 
 func handlePatchVideo(c *gin.Context) {
-	var params VideoFormData
+	var params db.Video
 
 	err := c.Bind(&params)
 

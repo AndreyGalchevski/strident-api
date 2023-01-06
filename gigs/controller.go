@@ -3,6 +3,7 @@ package gigs
 import (
 	"net/http"
 
+	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -32,7 +33,7 @@ func handleGetGigByID(c *gin.Context) {
 }
 
 func handlePostGig(c *gin.Context) {
-	var params GigFormData
+	var params db.Gig
 
 	err := c.Bind(&params)
 
@@ -66,7 +67,7 @@ func handlePostGig(c *gin.Context) {
 }
 
 func handlePatchGig(c *gin.Context) {
-	var params GigFormData
+	var params db.Gig
 
 	err := c.Bind(&params)
 

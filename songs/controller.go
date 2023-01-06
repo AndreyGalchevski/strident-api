@@ -3,6 +3,7 @@ package songs
 import (
 	"net/http"
 
+	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -32,7 +33,7 @@ func handleGetSongByID(c *gin.Context) {
 }
 
 func handlePostSong(c *gin.Context) {
-	var params SongFormData
+	var params db.Song
 
 	err := c.Bind(&params)
 
@@ -52,14 +53,13 @@ func handlePostSong(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"data": newSongID})
 }
 
 func handlePatchSong(c *gin.Context) {
-	var params SongFormData
+	var params db.Song
 
 	err := c.Bind(&params)
 

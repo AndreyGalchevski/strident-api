@@ -1,64 +1,25 @@
 package gigs
 
 import (
-	"context"
 	"errors"
 	"mime/multipart"
-	"strconv"
-	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/AndreyGalchevski/strident-api/images"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func getGigsCollection() *mongo.Collection {
-	return db.GetCollection(db.GetDBClient(), "gigs")
-}
-
-func getGigs() ([]Gig, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	opts := options.Find().SetSort(bson.D{{Key: "date", Value: -1}})
-
-	results, err := getGigsCollection().Find(ctx, bson.M{}, opts)
-
-	var gigs []Gig
+func getGigs() ([]*db.Gig, error) {
+	gigs, err := db.GetDB().Gigs.List()
 
 	if err != nil {
 		return gigs, err
 	}
 
-	defer results.Close(ctx)
-
-	for results.Next(ctx) {
-		var singleGig Gig
-
-		err = results.Decode(&singleGig)
-
-		if err != nil {
-			return gigs, err
-		}
-
-		gigs = append(gigs, singleGig)
-	}
-
 	return gigs, nil
 }
 
-func getGigByID(id string) (Gig, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	var gig Gig
-
-	objID, _ := primitive.ObjectIDFromHex(id)
-
-	err := getGigsCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&gig)
+func getGigByID(id string) (*db.Gig, error) {
+	gig, err := db.GetDB().Gigs.Retrieve(id)
 
 	if err != nil {
 		return gig, err
@@ -67,83 +28,40 @@ func getGigByID(id string) (Gig, error) {
 	return gig, nil
 }
 
-func createGig(params GigFormData, image multipart.File) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+func createGig(params db.Gig, image multipart.File) (string, error) {
+	imageURL, uploadImageErr := images.UploadImage("gigs", image)
 
-	timestamp, err := strconv.ParseInt(params.Date, 10, 0)
-
-	if err != nil {
-		return "", err
+	if uploadImageErr != nil {
+		return "", uploadImageErr
 	}
 
-	var gigData Gig
-	gigData.ID = primitive.NewObjectID()
-	gigData.Name = params.Name
-	gigData.Venue = params.Venue
-	gigData.Address = params.Address
-	gigData.City = params.City
-	gigData.Date = primitive.NewDateTimeFromTime(time.UnixMilli(timestamp))
-	gigData.FBEvent = params.FBEvent
+	params.Image = imageURL
 
-	result, err := getGigsCollection().InsertOne(ctx, gigData)
+	newGigID, createErr := db.GetDB().Gigs.Create(&params)
 
-	if err != nil {
-		return "", err
+	if createErr != nil {
+		deleteImageErr := images.DeleteImage(imageURL)
+
+		if deleteImageErr != nil {
+			return "", deleteImageErr
+		}
+
+		return "", createErr
 	}
 
-	imageURL, err := images.UploadImage("gigs", image)
-
-	if err != nil {
-		getGigsCollection().DeleteOne(ctx, bson.M{"_id": result.InsertedID})
-		return "", err
-	}
-
-	_, err = getGigsCollection().UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
-
-	if err != nil {
-		return "", err
-	}
-
-	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+	return newGigID, nil
 }
 
-func updateGig(gigID string, params GigFormData, image multipart.File) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	objID, _ := primitive.ObjectIDFromHex(gigID)
-
-	timestamp, err := strconv.ParseInt(params.Date, 10, 0)
-
-	if err != nil {
-		return false, err
-	}
-	update := bson.M{
-		"name":    params.Name,
-		"venue":   params.Venue,
-		"address": params.Address,
-		"city":    params.City,
-		"date":    primitive.NewDateTimeFromTime(time.UnixMilli(timestamp)),
-		"fbEvent": params.FBEvent,
-	}
-
-	result, err := getGigsCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
-
-	if err != nil {
-		return false, err
-	}
-
-	if result.MatchedCount != 1 {
-		return false, nil
-	}
+func updateGig(gigID string, params db.Gig, image multipart.File) (bool, error) {
 
 	if image != nil {
-		var gig Gig
+		gigToUpdate, err := db.GetDB().Gigs.Retrieve(gigID)
 
-		getGigsCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&gig)
+		if err != nil {
+			return false, err
+		}
 
-		err = images.DeleteImage(gig.Image)
+		err = images.DeleteImage(gigToUpdate.Image)
 
 		if err != nil {
 			return false, errors.New("failed to delete the old gig image")
@@ -155,39 +73,44 @@ func updateGig(gigID string, params GigFormData, image multipart.File) (bool, er
 			return false, errors.New("failed to upload the new gig image")
 		}
 
-		_, err = getGigsCollection().UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+		params.Image = imageURL
+	}
 
-		if err != nil {
-			return false, err
+	ok, err := db.GetDB().Gigs.Update(gigID, &params)
+
+	if err != nil {
+		if params.Image != "" {
+			err := images.DeleteImage(params.Image)
+
+			if err != nil {
+				return false, errors.New("failed to delete new gig image")
+			}
 		}
 
+		return false, err
+	}
+
+	if !ok {
+		return false, nil
 	}
 
 	return true, nil
 }
 
 func deleteGig(gigID string) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	objID, _ := primitive.ObjectIDFromHex(gigID)
-	filter := bson.M{"_id": objID}
-
-	var gigToDelete Gig
-
-	err := getGigsCollection().FindOne(ctx, filter).Decode(&gigToDelete)
+	gigToDelete, err := db.GetDB().Gigs.Retrieve(gigID)
 
 	if err != nil {
 		return false, err
 	}
 
-	result, err := getGigsCollection().DeleteOne(ctx, filter)
+	ok, err := db.GetDB().Gigs.Delete(gigID)
 
 	if err != nil {
 		return false, err
 	}
 
-	if result.DeletedCount != 1 {
+	if !ok {
 		return false, nil
 	}
 

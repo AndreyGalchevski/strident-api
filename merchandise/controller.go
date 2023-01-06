@@ -3,6 +3,7 @@ package merchandise
 import (
 	"net/http"
 
+	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -32,7 +33,7 @@ func handleGetMerchandiseByID(c *gin.Context) {
 }
 
 func handlePostMerchandise(c *gin.Context) {
-	var params MerchandiseFormData
+	var params db.Merchandise
 
 	err := c.Bind(&params)
 
@@ -66,7 +67,7 @@ func handlePostMerchandise(c *gin.Context) {
 }
 
 func handlePatchMerchandise(c *gin.Context) {
-	var params MerchandiseFormData
+	var params db.Merchandise
 
 	err := c.Bind(&params)
 

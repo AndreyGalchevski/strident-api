@@ -1,130 +1,66 @@
 package merchandise
 
 import (
-	"context"
 	"errors"
 	"mime/multipart"
-	"time"
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/AndreyGalchevski/strident-api/images"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func getMerchandiseCollection() *mongo.Collection {
-	return db.GetCollection(db.GetDBClient(), "merchandise")
-}
-
-func getMerchandise() ([]Merchandise, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	results, err := getMerchandiseCollection().Find(ctx, bson.M{})
-
-	var merchandise []Merchandise
+func getMerchandise() ([]*db.Merchandise, error) {
+	merchandise, err := db.GetDB().Merchandise.List()
 
 	if err != nil {
 		return merchandise, err
 	}
 
-	defer results.Close(ctx)
+	return merchandise, nil
+}
 
-	for results.Next(ctx) {
-		var singleMerchandise Merchandise
+func getMerchandiseByID(id string) (*db.Merchandise, error) {
+	merchandise, err := db.GetDB().Merchandise.Retrieve(id)
 
-		err = results.Decode(&singleMerchandise)
+	if err != nil {
+		return merchandise, err
+	}
 
-		if err != nil {
-			return merchandise, err
+	return merchandise, nil
+}
+
+func createMerchandise(params db.Merchandise, image multipart.File) (string, error) {
+	imageURL, uploadImageErr := images.UploadImage("merchandise", image)
+
+	if uploadImageErr != nil {
+		return "", uploadImageErr
+	}
+
+	params.Image = imageURL
+
+	newMerchandiseID, createErr := db.GetDB().Merchandise.Create(&params)
+
+	if createErr != nil {
+		deleteImageErr := images.DeleteImage(imageURL)
+
+		if deleteImageErr != nil {
+			return "", deleteImageErr
 		}
 
-		merchandise = append(merchandise, singleMerchandise)
+		return "", createErr
 	}
 
-	return merchandise, nil
+	return newMerchandiseID, nil
 }
 
-func getMerchandiseByID(id string) (Merchandise, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	var merchandise Merchandise
-
-	objID, _ := primitive.ObjectIDFromHex(id)
-
-	err := getMerchandiseCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
-
-	if err != nil {
-		return merchandise, err
-	}
-
-	return merchandise, nil
-}
-
-func createMerchandise(params MerchandiseFormData, image multipart.File) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	var merchandiseData Merchandise
-	merchandiseData.ID = primitive.NewObjectID()
-	merchandiseData.Name = params.Name
-	merchandiseData.Type = params.Type
-	merchandiseData.Price = params.Price
-	merchandiseData.URL = params.URL
-
-	result, err := getMerchandiseCollection().InsertOne(ctx, merchandiseData)
-
-	if err != nil {
-		return "", err
-	}
-
-	imageURL, err := images.UploadImage("merchandise", image)
-
-	if err != nil {
-		getMerchandiseCollection().DeleteOne(ctx, bson.M{"_id": result.InsertedID})
-		return "", err
-	}
-
-	_, err = getMerchandiseCollection().UpdateByID(ctx, result.InsertedID, bson.M{"$set": bson.M{"image": imageURL}})
-
-	if err != nil {
-		return "", err
-	}
-
-	return result.InsertedID.(primitive.ObjectID).Hex(), nil
-}
-
-func updateMerchandise(merchandiseID string, params MerchandiseFormData, image multipart.File) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	objID, _ := primitive.ObjectIDFromHex(merchandiseID)
-
-	update := bson.M{
-		"name":  params.Name,
-		"type":  params.Type,
-		"price": params.Price,
-		"url":   params.URL,
-	}
-
-	result, err := getMerchandiseCollection().UpdateByID(ctx, objID, bson.M{"$set": update})
-
-	if err != nil {
-		return false, err
-	}
-
-	if result.MatchedCount != 1 {
-		return false, nil
-	}
-
+func updateMerchandise(merchandiseID string, params db.Merchandise, image multipart.File) (bool, error) {
 	if image != nil {
-		var merchandise Merchandise
+		merchandiseToUpdate, err := db.GetDB().Merchandise.Retrieve(merchandiseID)
 
-		getMerchandiseCollection().FindOne(ctx, bson.M{"_id": objID}).Decode(&merchandise)
+		if err != nil {
+			return false, err
+		}
 
-		err = images.DeleteImage(merchandise.Image)
+		err = images.DeleteImage(merchandiseToUpdate.Image)
 
 		if err != nil {
 			return false, errors.New("failed to delete the old merchandise image")
@@ -136,39 +72,44 @@ func updateMerchandise(merchandiseID string, params MerchandiseFormData, image m
 			return false, errors.New("failed to upload the new merchandise image")
 		}
 
-		_, err = getMerchandiseCollection().UpdateByID(ctx, objID, bson.M{"$set": bson.M{"image": imageURL}})
+		params.Image = imageURL
+	}
 
-		if err != nil {
-			return false, err
+	ok, err := db.GetDB().Merchandise.Update(merchandiseID, &params)
+
+	if err != nil {
+		if params.Image != "" {
+			err := images.DeleteImage(params.Image)
+
+			if err != nil {
+				return false, errors.New("failed to delete new merchandise image")
+			}
 		}
 
+		return false, err
+	}
+
+	if !ok {
+		return false, nil
 	}
 
 	return true, nil
 }
 
-func deleteMerchandise(merchandiseD string) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	objID, _ := primitive.ObjectIDFromHex(merchandiseD)
-	filter := bson.M{"_id": objID}
-
-	var merchandiseToDelete Merchandise
-
-	err := getMerchandiseCollection().FindOne(ctx, filter).Decode(&merchandiseToDelete)
+func deleteMerchandise(merchandiseID string) (bool, error) {
+	merchandiseToDelete, err := db.GetDB().Merchandise.Retrieve(merchandiseID)
 
 	if err != nil {
 		return false, err
 	}
 
-	result, err := getMerchandiseCollection().DeleteOne(ctx, filter)
+	ok, err := db.GetDB().Merchandise.Delete(merchandiseID)
 
 	if err != nil {
 		return false, err
 	}
 
-	if result.DeletedCount != 1 {
+	if !ok {
 		return false, nil
 	}
 
