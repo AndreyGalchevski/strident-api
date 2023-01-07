@@ -3,27 +3,25 @@ package auth
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/AndreyGalchevski/strident-api/http_wrapper"
 )
 
-func VerifyAuthorization() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		cookie, err := c.Cookie(AUTH_COOKIE_NAME)
+func VerifyAuthorization(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie(AUTH_COOKIE_NAME)
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
+			http_wrapper.Failure(w, http.StatusUnauthorized, nil)
 			return
 		}
 
-		_, err = VerifyToken(cookie)
+		_, err = VerifyToken(cookie.Value)
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
+			http_wrapper.Failure(w, http.StatusUnauthorized, nil)
 			return
 		}
 
-		c.Next()
-	}
+		next.ServeHTTP(w, r)
+	})
 }

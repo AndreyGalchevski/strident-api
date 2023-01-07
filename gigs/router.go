@@ -2,19 +2,14 @@ package gigs
 
 import (
 	"github.com/AndreyGalchevski/strident-api/auth"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func InitGigsRouter(r *gin.Engine) {
-	r.GET("/gigs", handleGetGigs)
+func InitGigsRouter(r *mux.Router) {
+	r.HandleFunc("/gigs", handleGetGigs).Methods("GET")
 
-	authorized := r.Group("/")
-
-	authorized.Use(auth.VerifyAuthorization())
-	{
-		authorized.GET("/gigs/:id", handleGetGigByID)
-		authorized.POST("/gigs", handlePostGig)
-		authorized.PATCH("/gigs/:id", handlePatchGig)
-		authorized.DELETE("/gigs/:id", handleDeleteGig)
-	}
+	r.HandleFunc("/gigs/{id}", auth.VerifyAuthorization(handleGetGigByID)).Methods("GET")
+	r.HandleFunc("/gigs", auth.VerifyAuthorization(handlePostGig)).Methods("POST")
+	r.HandleFunc("/gigs/{id}", auth.VerifyAuthorization(handlePatchGig)).Methods("PATCH")
+	r.HandleFunc("/gigs/{id}", auth.VerifyAuthorization(handleDeleteGig)).Methods("DELETE")
 }

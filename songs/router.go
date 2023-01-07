@@ -2,19 +2,14 @@ package songs
 
 import (
 	"github.com/AndreyGalchevski/strident-api/auth"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func InitSongsRouter(r *gin.Engine) {
-	r.GET("/songs", handleGetSongs)
+func InitSongsRouter(r *mux.Router) {
+	r.HandleFunc("/songs", handleGetSongs).Methods("GET")
 
-	authorized := r.Group("/")
-
-	authorized.Use(auth.VerifyAuthorization())
-	{
-		authorized.GET("/songs/:id", handleGetSongByID)
-		authorized.POST("/songs", handlePostSong)
-		authorized.PATCH("/songs/:id", handlePatchSong)
-		authorized.DELETE("/songs/:id", handleDeleteSong)
-	}
+	r.HandleFunc("/songs/{id}", auth.VerifyAuthorization(handleGetSongByID)).Methods("GET")
+	r.HandleFunc("/songs", auth.VerifyAuthorization(handlePostSong)).Methods("POST")
+	r.HandleFunc("/songs/{id}", auth.VerifyAuthorization(handlePatchSong)).Methods("PATCH")
+	r.HandleFunc("/songs/{id}", auth.VerifyAuthorization(handleDeleteSong)).Methods("DELETE")
 }

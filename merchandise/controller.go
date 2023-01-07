@@ -4,114 +4,130 @@ import (
 	"net/http"
 
 	"github.com/AndreyGalchevski/strident-api/db"
-	"github.com/gin-gonic/gin"
+	"github.com/AndreyGalchevski/strident-api/http_wrapper"
+	"github.com/AndreyGalchevski/strident-api/validation"
+	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 var validate = validator.New()
+var decoder = form.NewDecoder()
 
-func handleGetMerchandise(c *gin.Context) {
+func handleGetMerchandise(w http.ResponseWriter, r *http.Request) {
 	merchandise, err := getMerchandise()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": merchandise})
+	http_wrapper.Success(w, http.StatusOK, merchandise)
 }
 
-func handleGetMerchandiseByID(c *gin.Context) {
-	merchandise, err := getMerchandiseByID(c.Param("id"))
+func handleGetMerchandiseByID(w http.ResponseWriter, r *http.Request) {
+	merchandise, err := getMerchandiseByID(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrMerchandiseNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": merchandise})
+	http_wrapper.Success(w, http.StatusOK, merchandise)
 }
 
-func handlePostMerchandise(c *gin.Context) {
+func handlePostMerchandise(w http.ResponseWriter, r *http.Request) {
 	var params db.Merchandise
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	image, _, err := c.Request.FormFile("image")
+	image, _, err := r.FormFile("image")
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, err)
 		return
+	}
+
+	if image != nil {
+		defer image.Close()
 	}
 
 	newMerchandiseID, err := createMerchandise(params, image)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
+		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": newMerchandiseID})
+	http_wrapper.Success(w, http.StatusOK, newMerchandiseID)
 }
 
-func handlePatchMerchandise(c *gin.Context) {
+func handlePatchMerchandise(w http.ResponseWriter, r *http.Request) {
 	var params db.Merchandise
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	image, _, _ := c.Request.FormFile("image")
+	image, _, _ := r.FormFile("image")
 
-	ok, err := updateMerchandise(c.Param("id"), params, image)
+	if image != nil {
+		defer image.Close()
+	}
+
+	ok, err := updateMerchandise(mux.Vars(r)["id"], params, image)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Merchandise not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrMerchandiseNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }
 
-func handleDeleteMerchandise(c *gin.Context) {
-	ok, err := deleteMerchandise(c.Param("id"))
+func handleDeleteMerchandise(w http.ResponseWriter, r *http.Request) {
+	ok, err := deleteMerchandise(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Merchandise not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrMerchandiseNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }

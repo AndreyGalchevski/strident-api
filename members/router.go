@@ -2,19 +2,14 @@ package members
 
 import (
 	"github.com/AndreyGalchevski/strident-api/auth"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func InitMembersRouter(r *gin.Engine) {
-	r.GET("/members", handleGetMembers)
+func InitMembersRouter(r *mux.Router) {
+	r.HandleFunc("/members", handleGetMembers).Methods("GET")
 
-	authorized := r.Group("/")
-
-	authorized.Use(auth.VerifyAuthorization())
-	{
-		authorized.GET("/members/:id", handleGetMemberByID)
-		authorized.POST("/members", handlePostMember)
-		authorized.PATCH("/members/:id", handlePatchMember)
-		authorized.DELETE("/members/:id", handleDeleteMember)
-	}
+	r.HandleFunc("/members/{id}", auth.VerifyAuthorization(handleGetMemberByID)).Methods("GET")
+	r.HandleFunc("/members", auth.VerifyAuthorization(handlePostMember)).Methods("POST")
+	r.HandleFunc("/members/{id}", auth.VerifyAuthorization(handlePatchMember)).Methods("PATCH")
+	r.HandleFunc("/members/{id}", auth.VerifyAuthorization(handleDeleteMember)).Methods("DELETE")
 }

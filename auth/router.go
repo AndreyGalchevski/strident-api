@@ -1,8 +1,10 @@
 package auth
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gorilla/mux"
+)
 
-func InitAuthRouter(router *gin.Engine) {
-	router.POST("/auth/login", handlePostLogin)
-	router.GET("/auth/verify", handleGetVerify)
+func InitAuthRouter(router *mux.Router) {
+	router.HandleFunc("/auth/login", handlePostLogin).Methods("POST")
+	router.HandleFunc("/auth/verify", handleGetVerify).Methods("GET")
 }

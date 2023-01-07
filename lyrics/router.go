@@ -2,19 +2,14 @@ package lyrics
 
 import (
 	"github.com/AndreyGalchevski/strident-api/auth"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func InitLyricsRouter(r *gin.Engine) {
-	r.GET("/lyrics", handleGetLyrics)
+func InitLyricsRouter(r *mux.Router) {
+	r.HandleFunc("/lyrics", handleGetLyrics).Methods("GET")
 
-	authorized := r.Group("/")
-
-	authorized.Use(auth.VerifyAuthorization())
-	{
-		authorized.GET("/lyrics/:id", handleGetLyricByID)
-		authorized.POST("/lyrics", handlePostLyric)
-		authorized.PATCH("/lyrics/:id", handlePatchLyric)
-		authorized.DELETE("/lyrics/:id", handleDeleteLyric)
-	}
+	r.HandleFunc("/lyrics/{id}", auth.VerifyAuthorization(handleGetLyricByID)).Methods("GET")
+	r.HandleFunc("/lyrics", auth.VerifyAuthorization(handlePostLyric)).Methods("POST")
+	r.HandleFunc("/lyrics/{id}", auth.VerifyAuthorization(handlePatchLyric)).Methods("PATCH")
+	r.HandleFunc("/lyrics/{id}", auth.VerifyAuthorization(handleDeleteLyric)).Methods("DELETE")
 }

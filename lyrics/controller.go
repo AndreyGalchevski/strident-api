@@ -4,105 +4,113 @@ import (
 	"net/http"
 
 	"github.com/AndreyGalchevski/strident-api/db"
-	"github.com/gin-gonic/gin"
+	"github.com/AndreyGalchevski/strident-api/http_wrapper"
+	"github.com/AndreyGalchevski/strident-api/validation"
+	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 var validate = validator.New()
+var decoder = form.NewDecoder()
 
-func handleGetLyrics(c *gin.Context) {
+func handleGetLyrics(w http.ResponseWriter, r *http.Request) {
 	lyrics, err := getLyrics()
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": lyrics})
+	http_wrapper.Success(w, http.StatusOK, lyrics)
 }
 
-func handleGetLyricByID(c *gin.Context) {
-	lyric, err := getLyricByID(c.Param("id"))
+func handleGetLyricByID(w http.ResponseWriter, r *http.Request) {
+	lyric, err := getLyricByID(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrLyricNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": lyric})
+	http_wrapper.Success(w, http.StatusOK, lyric)
 }
 
-func handlePostLyric(c *gin.Context) {
+func handlePostLyric(w http.ResponseWriter, r *http.Request) {
 	var params db.Lyric
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
 	newLyricID, err := createLyric(params)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
+		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": newLyricID})
+	http_wrapper.Success(w, http.StatusOK, newLyricID)
 }
 
-func handlePatchLyric(c *gin.Context) {
+func handlePatchLyric(w http.ResponseWriter, r *http.Request) {
 	var params db.Lyric
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	ok, err := updateLyric(c.Param("id"), params)
+	ok, err := updateLyric(mux.Vars(r)["id"], params)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Lyric not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrLyricNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }
 
-func handleDeleteLyric(c *gin.Context) {
-	ok, err := deleteLyric(c.Param("id"))
+func handleDeleteLyric(w http.ResponseWriter, r *http.Request) {
+	ok, err := deleteLyric(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Lyric not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrLyricNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }

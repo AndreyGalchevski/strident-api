@@ -1,21 +1,24 @@
 package main
 
 import (
-	"fmt"
+	"errors"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/AndreyGalchevski/strident-api/auth"
 	"github.com/AndreyGalchevski/strident-api/db"
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
+
 	"github.com/AndreyGalchevski/strident-api/gigs"
 	"github.com/AndreyGalchevski/strident-api/lyrics"
 	"github.com/AndreyGalchevski/strident-api/members"
 	"github.com/AndreyGalchevski/strident-api/merchandise"
 	"github.com/AndreyGalchevski/strident-api/songs"
 	"github.com/AndreyGalchevski/strident-api/videos"
-	"github.com/gin-gonic/gin"
+
 	"github.com/joho/godotenv"
-	cors "github.com/rs/cors/wrapper/gin"
 )
 
 func main() {
@@ -26,16 +29,6 @@ func main() {
 	}
 
 	db.Connect()
-
-	if os.Getenv("APP_ENV") == "prod" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	router := gin.Default()
-
-	router.SetTrustedProxies(nil)
-
-	router.MaxMultipartMemory = 8 << 20
 
 	corsConfig := cors.Options{
 		AllowedOrigins:     []string{os.Getenv("WEB_APP_URL")},
@@ -50,20 +43,7 @@ func main() {
 		},
 	}
 
-	router.Use(cors.New(corsConfig))
-
-	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("%s - \"%s %s %s %d %s \"%s\" %s\"\n",
-			param.ClientIP,
-			param.Method,
-			param.Path,
-			param.Request.Proto,
-			param.StatusCode,
-			param.Latency,
-			param.Request.UserAgent(),
-			param.ErrorMessage,
-		)
-	}))
+	router := mux.NewRouter()
 
 	auth.InitAuthRouter(router)
 	gigs.InitGigsRouter(router)
@@ -73,5 +53,14 @@ func main() {
 	songs.InitSongsRouter(router)
 	videos.InitVideosRouter(router)
 
-	router.Run()
+	routerWithCors := cors.New(corsConfig).Handler(router)
+
+	http.ListenAndServe(":8080", routerWithCors)
+
+	if errors.Is(err, http.ErrServerClosed) {
+		log.Printf("server closed\n")
+	} else if err != nil {
+		log.Printf("error starting server: %s\n", err)
+		os.Exit(1)
+	}
 }

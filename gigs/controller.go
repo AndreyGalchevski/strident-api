@@ -1,117 +1,128 @@
 package gigs
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/AndreyGalchevski/strident-api/db"
-	"github.com/gin-gonic/gin"
+	"github.com/AndreyGalchevski/strident-api/http_wrapper"
+	"github.com/AndreyGalchevski/strident-api/validation"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 var validate = validator.New()
 
-func handleGetGigs(c *gin.Context) {
+func handleGetGigs(w http.ResponseWriter, r *http.Request) {
 	gigs, err := getGigs()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": gigs})
+	http_wrapper.Success(w, http.StatusOK, gigs)
 }
 
-func handleGetGigByID(c *gin.Context) {
-	gig, err := getGigByID(c.Param("id"))
+func handleGetGigByID(w http.ResponseWriter, r *http.Request) {
+	gig, err := getGigByID(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrGigNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": gig})
+	http_wrapper.Success(w, http.StatusOK, gig)
 }
 
-func handlePostGig(c *gin.Context) {
+func handlePostGig(w http.ResponseWriter, r *http.Request) {
 	var params db.Gig
 
-	err := c.Bind(&params)
+	err := json.NewDecoder(r.Body).Decode(&params)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	image, _, err := c.Request.FormFile("image")
+	image, _, err := r.FormFile("image")
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, err)
 		return
+	}
+
+	if image != nil {
+		defer image.Close()
 	}
 
 	newGigID, err := createGig(params, image)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
+		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": newGigID})
+	http_wrapper.Success(w, http.StatusOK, newGigID)
 }
 
-func handlePatchGig(c *gin.Context) {
+func handlePatchGig(w http.ResponseWriter, r *http.Request) {
 	var params db.Gig
 
-	err := c.Bind(&params)
+	err := json.NewDecoder(r.Body).Decode(&params)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	image, _, _ := c.Request.FormFile("image")
+	image, _, _ := r.FormFile("image")
 
-	ok, err := updateGig(c.Param("id"), params, image)
+	if image != nil {
+		defer image.Close()
+	}
+
+	ok, err := updateGig(mux.Vars(r)["id"], params, image)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Gig not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrGigNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }
 
-func handleDeleteGig(c *gin.Context) {
-	ok, err := deleteGig(c.Param("id"))
+func handleDeleteGig(w http.ResponseWriter, r *http.Request) {
+	ok, err := deleteGig(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Gig not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrGigNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }

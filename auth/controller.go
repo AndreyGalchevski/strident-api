@@ -1,42 +1,51 @@
 package auth
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/AndreyGalchevski/strident-api/http_wrapper"
+	"github.com/AndreyGalchevski/strident-api/validation"
+	"github.com/go-playground/validator/v10"
 )
 
 const AUTH_COOKIE_NAME = "stridentToken"
 
 type Credentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
-func handlePostLogin(c *gin.Context) {
+var validate = validator.New()
+
+func handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	var credentials Credentials
 
-	err := c.BindJSON(&credentials)
+	err := json.NewDecoder(r.Body).Decode(&credentials)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Please try again"})
+		http_wrapper.Failure(w, http.StatusBadRequest, errors.New("please try again"))
+		return
+	}
+
+	err = validate.Struct(&credentials)
+
+	if err != nil {
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
 	token, err := login(credentials)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	isProd := os.Getenv("APP_ENV") == "prod"
-
-	if isProd {
-		c.SetSameSite(http.SameSiteNoneMode)
-	}
 
 	domain := ""
 
@@ -44,24 +53,29 @@ func handlePostLogin(c *gin.Context) {
 		domain = strings.TrimSuffix(os.Getenv("WEB_APP_URL"), "/")
 	}
 
-	c.SetCookie(
-		AUTH_COOKIE_NAME,
-		token,
-		int(TokenMaxAge.Seconds()),
-		"/",
-		domain,
-		isProd,
-		true,
-	)
+	cookie := http.Cookie{
+		Name:     AUTH_COOKIE_NAME,
+		Value:    token,
+		Path:     "/",
+		MaxAge:   int(TokenMaxAge.Seconds()),
+		HttpOnly: true,
+		Secure:   isProd,
+		SameSite: http.SameSiteLaxMode,
+		Domain:   domain,
+	}
+
+	http.SetCookie(w, &cookie)
+
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }
 
-func handleGetVerify(c *gin.Context) {
-	_, err := c.Cookie(AUTH_COOKIE_NAME)
+func handleGetVerify(w http.ResponseWriter, r *http.Request) {
+	_, err := r.Cookie(AUTH_COOKIE_NAME)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
+		http_wrapper.Failure(w, http.StatusUnauthorized, errors.New("session expired"))
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }

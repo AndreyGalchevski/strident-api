@@ -4,105 +4,113 @@ import (
 	"net/http"
 
 	"github.com/AndreyGalchevski/strident-api/db"
-	"github.com/gin-gonic/gin"
+	"github.com/AndreyGalchevski/strident-api/http_wrapper"
+	"github.com/AndreyGalchevski/strident-api/validation"
+	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 var validate = validator.New()
+var decoder = form.NewDecoder()
 
-func handleGetVideos(c *gin.Context) {
+func handleGetVideos(w http.ResponseWriter, r *http.Request) {
 	videos, err := getVideos()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": videos})
+	http_wrapper.Success(w, http.StatusOK, videos)
 }
 
-func handleGetVideoByID(c *gin.Context) {
-	video, err := getVideoByID(c.Param("id"))
+func handleGetVideoByID(w http.ResponseWriter, r *http.Request) {
+	video, err := getVideoByID(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrVideoNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": video})
+	http_wrapper.Success(w, http.StatusOK, video)
 }
 
-func handlePostVideo(c *gin.Context) {
+func handlePostVideo(w http.ResponseWriter, r *http.Request) {
 	var params db.Video
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
 	newVideoID, err := createVideo(params)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
+		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": newVideoID})
+	http_wrapper.Success(w, http.StatusOK, newVideoID)
 }
 
-func handlePatchVideo(c *gin.Context) {
+func handlePatchVideo(w http.ResponseWriter, r *http.Request) {
 	var params db.Video
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	ok, err := updateVideo(c.Param("id"), params)
+	ok, err := updateVideo(mux.Vars(r)["id"], params)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Video not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrVideoNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }
 
-func handleDeleteVideo(c *gin.Context) {
-	ok, err := deleteVideo(c.Param("id"))
+func handleDeleteVideo(w http.ResponseWriter, r *http.Request) {
+	ok, err := deleteVideo(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Video not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrVideoNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }

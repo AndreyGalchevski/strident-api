@@ -2,19 +2,14 @@ package videos
 
 import (
 	"github.com/AndreyGalchevski/strident-api/auth"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func InitVideosRouter(r *gin.Engine) {
-	r.GET("/videos", handleGetVideos)
+func InitVideosRouter(r *mux.Router) {
+	r.HandleFunc("/videos", handleGetVideos).Methods("GET")
 
-	authorized := r.Group("/")
-
-	authorized.Use(auth.VerifyAuthorization())
-	{
-		authorized.GET("/videos/:id", handleGetVideoByID)
-		authorized.POST("/videos", handlePostVideo)
-		authorized.PATCH("/videos/:id", handlePatchVideo)
-		authorized.DELETE("/videos/:id", handleDeleteVideo)
-	}
+	r.HandleFunc("/videos/{id}", auth.VerifyAuthorization(handleGetVideoByID)).Methods("GET")
+	r.HandleFunc("/videos", auth.VerifyAuthorization(handlePostVideo)).Methods("POST")
+	r.HandleFunc("/videos/{id}", auth.VerifyAuthorization(handlePatchVideo)).Methods("PATCH")
+	r.HandleFunc("/videos/{id}", auth.VerifyAuthorization(handleDeleteVideo)).Methods("DELETE")
 }

@@ -4,114 +4,130 @@ import (
 	"net/http"
 
 	"github.com/AndreyGalchevski/strident-api/db"
-	"github.com/gin-gonic/gin"
+	"github.com/AndreyGalchevski/strident-api/http_wrapper"
+	"github.com/AndreyGalchevski/strident-api/validation"
+	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 var validate = validator.New()
+var decoder = form.NewDecoder()
 
-func handleGetMembers(c *gin.Context) {
+func handleGetMembers(w http.ResponseWriter, r *http.Request) {
 	members, err := getMembers()
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": members})
+	http_wrapper.Success(w, http.StatusOK, members)
 }
 
-func handleGetMemberByID(c *gin.Context) {
-	member, err := getMemberByID(c.Param("id"))
+func handleGetMemberByID(w http.ResponseWriter, r *http.Request) {
+	member, err := getMemberByID(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrMemberNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": member})
+	http_wrapper.Success(w, http.StatusOK, member)
 }
 
-func handlePostMember(c *gin.Context) {
+func handlePostMember(w http.ResponseWriter, r *http.Request) {
 	var params db.Member
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	image, _, err := c.Request.FormFile("image")
+	image, _, err := r.FormFile("image")
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, err)
 		return
+	}
+
+	if image != nil {
+		defer image.Close()
 	}
 
 	newMemberID, err := createMember(params, image)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
+		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": newMemberID})
+	http_wrapper.Success(w, http.StatusOK, newMemberID)
 }
 
-func handlePatchMember(c *gin.Context) {
+func handlePatchMember(w http.ResponseWriter, r *http.Request) {
 	var params db.Member
 
-	err := c.Bind(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	err = validate.Struct(&params)
 
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Please fill out all the required fields"})
+		http_wrapper.Failure(w, http.StatusUnprocessableEntity, validation.ErrMissingFields)
 		return
 	}
 
-	image, _, _ := c.Request.FormFile("image")
+	image, _, _ := r.FormFile("image")
 
-	ok, err := updateMember(c.Param("id"), params, image)
+	if image != nil {
+		defer image.Close()
+	}
+
+	ok, err := updateMember(mux.Vars(r)["id"], params, image)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Member not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrMemberNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }
 
-func handleDeleteMember(c *gin.Context) {
-	ok, err := deleteMember(c.Param("id"))
+func handleDeleteMember(w http.ResponseWriter, r *http.Request) {
+	ok, err := deleteMember(mux.Vars(r)["id"])
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http_wrapper.Failure(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		http_wrapper.Failure(w, http.StatusNotFound, ErrMemberNotFound)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"data": gin.H{}})
+	http_wrapper.Success(w, http.StatusNoContent, nil)
 }

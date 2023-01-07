@@ -2,19 +2,14 @@ package merchandise
 
 import (
 	"github.com/AndreyGalchevski/strident-api/auth"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func InitMerchandiseRouter(r *gin.Engine) {
-	r.GET("/merchandise", handleGetMerchandise)
+func InitMerchandiseRouter(r *mux.Router) {
+	r.HandleFunc("/merchandise", handleGetMerchandise).Methods("GET")
 
-	authorized := r.Group("/")
-
-	authorized.Use(auth.VerifyAuthorization())
-	{
-		authorized.GET("/merchandise/:id", handleGetMerchandiseByID)
-		authorized.POST("/merchandise", handlePostMerchandise)
-		authorized.PATCH("/merchandise/:id", handlePatchMerchandise)
-		authorized.DELETE("/merchandise/:id", handleDeleteMerchandise)
-	}
+	r.HandleFunc("/merchandise/{id}", auth.VerifyAuthorization(handleGetMerchandiseByID)).Methods("GET")
+	r.HandleFunc("/merchandise", auth.VerifyAuthorization(handlePostMerchandise)).Methods("POST")
+	r.HandleFunc("/merchandise/{id}", auth.VerifyAuthorization(handlePatchMerchandise)).Methods("PATCH")
+	r.HandleFunc("/merchandise/{id}", auth.VerifyAuthorization(handleDeleteMerchandise)).Methods("DELETE")
 }
