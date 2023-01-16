@@ -9,7 +9,7 @@ import (
 )
 
 func getMerchandise() ([]*db.Merchandise, error) {
-	merchandise, err := db.GetDB().Merchandise.List()
+	merchandise, err := db.GetDB().Merchandise.List(nil)
 
 	if err != nil {
 		return merchandise, err

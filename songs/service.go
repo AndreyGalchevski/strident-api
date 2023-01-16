@@ -5,7 +5,7 @@ import (
 )
 
 func getSongs() ([]*db.Song, error) {
-	songs, err := db.GetDB().Songs.List()
+	songs, err := db.GetDB().Songs.List(nil)
 
 	if err != nil {
 		return songs, err

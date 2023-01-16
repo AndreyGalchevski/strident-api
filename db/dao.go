@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Document interface {
@@ -30,11 +31,11 @@ type Collection[T Document] struct {
 	collection *mongo.Collection
 }
 
-func (repo *Collection[T]) List() ([]T, error) {
+func (repo *Collection[T]) List(opts *options.FindOptions) ([]T, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	results, err := repo.collection.Find(ctx, bson.M{})
+	results, err := repo.collection.Find(ctx, bson.M{}, opts)
 
 	var documents []T
 

@@ -9,7 +9,7 @@ import (
 )
 
 func getMembers() ([]*db.Member, error) {
-	members, err := db.GetDB().Members.List()
+	members, err := db.GetDB().Members.List(nil)
 
 	if err != nil {
 		return members, err

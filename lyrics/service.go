@@ -5,7 +5,7 @@ import (
 )
 
 func getLyrics() ([]*db.Lyric, error) {
-	lyrics, err := db.GetDB().Lyrics.List()
+	lyrics, err := db.GetDB().Lyrics.List(nil)
 
 	if err != nil {
 		return lyrics, err

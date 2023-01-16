@@ -5,7 +5,7 @@ import (
 )
 
 func getVideos() ([]*db.Video, error) {
-	videos, err := db.GetDB().Videos.List()
+	videos, err := db.GetDB().Videos.List(nil)
 
 	if err != nil {
 		return videos, err

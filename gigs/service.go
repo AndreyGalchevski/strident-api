@@ -6,10 +6,14 @@ import (
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/AndreyGalchevski/strident-api/images"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func getGigs() ([]*db.Gig, error) {
-	gigs, err := db.GetDB().Gigs.List()
+	opts := options.Find().SetSort(bson.D{{Key: "date", Value: -1}})
+
+	gigs, err := db.GetDB().Gigs.List(opts)
 
 	if err != nil {
 		return gigs, err
