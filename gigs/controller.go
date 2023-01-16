@@ -1,17 +1,18 @@
 package gigs
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/AndreyGalchevski/strident-api/db"
 	"github.com/AndreyGalchevski/strident-api/http_wrapper"
 	"github.com/AndreyGalchevski/strident-api/validation"
+	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
 var validate = validator.New()
+var decoder = form.NewDecoder()
 
 func handleGetGigs(w http.ResponseWriter, r *http.Request) {
 	gigs, err := getGigs()
@@ -38,7 +39,9 @@ func handleGetGigByID(w http.ResponseWriter, r *http.Request) {
 func handlePostGig(w http.ResponseWriter, r *http.Request) {
 	var params db.Gig
 
-	err := json.NewDecoder(r.Body).Decode(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
 		http_wrapper.Failure(w, http.StatusBadRequest, nil)
@@ -76,7 +79,9 @@ func handlePostGig(w http.ResponseWriter, r *http.Request) {
 func handlePatchGig(w http.ResponseWriter, r *http.Request) {
 	var params db.Gig
 
-	err := json.NewDecoder(r.Body).Decode(&params)
+	r.ParseMultipartForm(validation.FormDataLimit)
+
+	err := decoder.Decode(&params, r.Form)
 
 	if err != nil {
 		http_wrapper.Failure(w, http.StatusBadRequest, nil)
