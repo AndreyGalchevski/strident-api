@@ -41,6 +41,13 @@ type Merchandise struct {
 	Image string `json:"image,omitempty" bson:"image,omitempty"`
 }
 
+type Album struct {
+	Doc  `bson:",inline"`
+	Name string `json:"name,omitempty" bson:"name" form:"name" validate:"required"`
+	URL  string `json:"url,omitempty" bson:"url" form:"url" validate:"required,url"`
+	Year int    `json:"year,omitempty" bson:"year" form:"year" validate:"required"`
+}
+
 type Song struct {
 	Doc   `bson:",inline"`
 	Name  string `json:"name,omitempty" bson:"name" form:"name" validate:"required"`
@@ -55,6 +62,7 @@ type Video struct {
 }
 
 type Database struct {
+	Albums      *Collection[*Album]
 	Gigs        *Collection[*Gig]
 	Lyrics      *Collection[*Lyric]
 	Members     *Collection[*Member]
@@ -70,6 +78,7 @@ func GetCollectionNew[T Document](collectionName string) *Collection[T] {
 
 func GetDB() Database {
 	return Database{
+		Albums:      GetCollectionNew[*Album]("albums"),
 		Gigs:        GetCollectionNew[*Gig]("gigs"),
 		Lyrics:      GetCollectionNew[*Lyric]("lyrics"),
 		Members:     GetCollectionNew[*Member]("members"),

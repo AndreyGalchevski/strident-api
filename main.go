@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 
+	"github.com/AndreyGalchevski/strident-api/albums"
 	"github.com/AndreyGalchevski/strident-api/gigs"
 	"github.com/AndreyGalchevski/strident-api/lyrics"
 	"github.com/AndreyGalchevski/strident-api/members"
@@ -46,6 +47,7 @@ func main() {
 	router := mux.NewRouter()
 
 	auth.InitAuthRouter(router)
+	albums.InitAlbumsRouter(router)
 	gigs.InitGigsRouter(router)
 	lyrics.InitLyricsRouter(router)
 	members.InitMembersRouter(router)
